@@ -1,0 +1,5 @@
+**.obj
+output/**
+
+main.exe
+perf.data
