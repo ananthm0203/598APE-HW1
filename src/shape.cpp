@@ -36,36 +36,18 @@ typedef struct {
    Shape* shape;
 } TimeAndShape;
 
-void insertionSort(TimeAndShape *arr, int n) {
-    for (int i = 1; i < n; ++i) {
-        TimeAndShape key = arr[i];
-        int j = i - 1;
-        while (j >= 0 && arr[j].time > key.time) {
-            arr[j + 1] = arr[j];
-            j = j - 1;
-        }
-        arr[j + 1] = key;
-    }
-}
-
 void calcColor(unsigned char* toFill,Autonoma* c, Ray ray, unsigned int depth){
    ShapeNode* t = c->listStart;
-   TimeAndShape *times = (TimeAndShape*)malloc(0);
-   size_t seen = 0;
+   TimeAndShape first_ts = { inf, NULL };
    while(t!=NULL){
       double time = t->data->getIntersection(ray);
-
-      TimeAndShape *times2 = (TimeAndShape*)malloc(sizeof(TimeAndShape)*(seen + 1));
-      for (int i=0; i<seen; i++)
-         times2[i] = times[i];
-      times2[seen] = (TimeAndShape){ time, t->data };
-      free(times);
-      times = times2;
-      seen ++;
+      if (time < first_ts.time) {
+         first_ts.time = time;
+         first_ts.shape = t->data;
+      }
       t = t->next;
    }
-   insertionSort(times, seen);
-   if (seen == 0 || times[0].time == inf) {
+   if (first_ts.time == inf) {
       double opacity, reflection, ambient;
       Vector temp = ray.vector.normalize();
       const double x = temp.x;
@@ -76,9 +58,8 @@ void calcColor(unsigned char* toFill,Autonoma* c, Ray ray, unsigned int depth){
       return;
    }
 
-   double curTime = times[0].time;
-   Shape* curShape = times[0].shape;
-   free(times);
+   double curTime = first_ts.time;
+   Shape* curShape = first_ts.shape;
 
    Vector intersect = curTime*ray.vector+ray.point;
    double opacity, reflection, ambient;
