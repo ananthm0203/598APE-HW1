@@ -2,4 +2,4 @@
 output/**
 
 main.exe
-perf.data
+perf.data*
