@@ -3,3 +3,5 @@ output/**
 
 main.exe
 perf.data*
+
+.vscode/**
