@@ -7,6 +7,7 @@
 #include "src/box.h"
 #include "src/disk.h"
 #include "src/triangle.h"
+#include "src/autonoma.h"
 #include "src/Textures/imagetexture.h"
 #include "src/Textures/colortexture.h"
 #include<stdio.h>
@@ -43,6 +44,96 @@ void set(int i, int j, unsigned char r, unsigned char g, unsigned char b){
    DATA[3*(i+j*W)] = r; 
    DATA[3*(i+j*W)+1] = g; 
    DATA[3*(i+j*W)+2] = b; 
+}
+
+void getLight(double* tColor, Autonoma* aut, Vector point, Vector norm, unsigned char flip){
+   tColor[0] = tColor[1] = tColor[2] = 0.;
+   for (auto t : aut->unifiedLightList) {
+      double lightColor[3];     
+      lightColor[0] = t->color[0]/255.;
+      lightColor[1] = t->color[1]/255.;
+      lightColor[2] = t->color[2]/255.;
+      Vector ra = t->center-point;
+      bool hit = false;
+      for (auto s : aut->unifiedShapeList) {
+         hit = s->getLightIntersection(Ray(point+ra*.01, ra), lightColor);
+         if (hit) {
+            break;
+         }
+      }
+      double perc = (norm.dot(ra)/(ra.mag()*norm.mag()));
+      if(!hit){
+      if(flip && perc<0) perc=-perc;
+        if(perc>0){
+      
+         tColor[0]+= perc*(lightColor[0]);
+         tColor[1]+= perc*(lightColor[0]);
+         tColor[2]+= perc*(lightColor[0]);
+         if(tColor[0]>1.) tColor[0] = 1.;
+         if(tColor[1]>1.) tColor[1] = 1.;
+         if(tColor[2]>1.) tColor[2] = 1.;
+        }
+      }
+   }
+}
+
+typedef struct {
+    double time;
+    Shape* shape;
+} TimeAndShape;
+
+void calcColor(unsigned char* toFill,Autonoma* c, Ray ray, unsigned int depth){
+   TimeAndShape first_ts = { inf, nullptr };
+   for (auto t : c->unifiedShapeList) {
+      double time = t->getIntersection(ray);
+      if (time < first_ts.time) {
+         first_ts.time = time;
+         first_ts.shape = t;
+      }
+   }
+   if (first_ts.time == inf) {
+      double opacity, reflection, ambient;
+      Vector temp = ray.vector.normalize();
+      const double x = temp.x;
+      const double z = temp.z;
+      const double me = (temp.y<0)?-temp.y:temp.y;
+      const double angle = atan2(z, x);
+      c->skybox->getColor(toFill, &ambient, &opacity, &reflection, fix(angle/M_TWO_PI),fix(me));
+      return;
+   }
+
+   double curTime = first_ts.time;
+   Shape* curShape = first_ts.shape;
+
+   Vector intersect = curTime*ray.vector+ray.point;
+   double opacity, reflection, ambient;
+   curShape->getColor(toFill, &ambient, &opacity, &reflection, Ray(intersect, ray.vector), depth);
+   
+   double lightData[3];
+   getLight(lightData, c, intersect, curShape->getNormal(intersect), curShape->reversible());
+   toFill[0] = (unsigned char)(toFill[0]*(ambient+lightData[0]*(1-ambient)));
+   toFill[1] = (unsigned char)(toFill[1]*(ambient+lightData[1]*(1-ambient)));
+   toFill[2] = (unsigned char)(toFill[2]*(ambient+lightData[2]*(1-ambient)));
+   if(depth<c->depth && (opacity<1-1e-6 || reflection>1e-6)){
+      unsigned char col[4];
+      if(opacity<1-1e-6){
+         Ray nextRay = Ray(intersect+ray.vector*1E-4, ray.vector);
+         calcColor(col, c, nextRay, depth+1);
+         toFill[0]= (unsigned char)(toFill[0]*opacity+col[0]*(1-opacity));
+         toFill[1]= (unsigned char)(toFill[1]*opacity+col[1]*(1-opacity));
+         toFill[2]= (unsigned char)(toFill[2]*opacity+col[2]*(1-opacity));        
+      }
+      if(reflection>1e-6){
+         Vector norm = curShape->getNormal(intersect).normalize();
+         Vector vec = ray.vector-2*norm*(norm.dot(ray.vector));
+         Ray nextRay = Ray(intersect+vec*1E-4, vec);
+         calcColor(col, c, nextRay, depth+1);
+      
+         toFill[0]= (unsigned char)(toFill[0]*(1-reflection)+col[0]*(reflection));
+         toFill[1]= (unsigned char)(toFill[1]*(1-reflection)+col[1]*(reflection));
+         toFill[2]= (unsigned char)(toFill[2]*(1-reflection)+col[2]*(reflection));
+      }
+   }
 }
 
 void refresh(Autonoma* c){
@@ -242,7 +333,7 @@ Autonoma* createInputs(const char* inputFile) {
             }
             Texture *texture = parseTexture(f, false);
             Plane *shape = new Plane(Vector(plane_x, plane_y, plane_z), texture, yaw, pitch, roll, tx, ty);
-            MAIN_DATA->addShape(shape);
+            MAIN_DATA->addPlane(shape);
             shape->normalMap = parseTexture(f, true);
          } else if (streq(object_type, "disk")) {
             double disk_x, disk_y, disk_z;
@@ -254,7 +345,7 @@ Autonoma* createInputs(const char* inputFile) {
             }
             Texture *texture = parseTexture(f, false);
             Disk* shape = new Disk(Vector(disk_x, disk_y, disk_z), texture, yaw, pitch, roll, tx, ty);
-            MAIN_DATA->addShape(shape);
+            MAIN_DATA->addDisk(shape);
             shape->normalMap = parseTexture(f, true);
          } else if (streq(object_type, "box")) {
             double box_x, box_y, box_z;
@@ -266,7 +357,7 @@ Autonoma* createInputs(const char* inputFile) {
             }
             Texture *texture = parseTexture(f, false);
             Box* shape = new Box(Vector(box_x, box_y, box_z), texture, yaw, pitch, roll, tx, ty);
-            MAIN_DATA->addShape(shape);
+            MAIN_DATA->addBox(shape);
             shape->normalMap = parseTexture(f, true);
          } else if (streq(object_type, "triangle")) {
             double x1, y1, z1;
@@ -278,7 +369,7 @@ Autonoma* createInputs(const char* inputFile) {
             }
             Texture *texture = parseTexture(f, false);
             Triangle* shape = new Triangle(Vector(x1, y1, z1), Vector(x2, y2, z2), Vector(x3, y3, z3), texture);
-            MAIN_DATA->addShape(shape);
+            MAIN_DATA->addTriangle(shape);
             shape->normalMap = parseTexture(f, true);
          } else if (streq(object_type, "sphere")) {
             double sphere_x, sphere_y, sphere_z;
@@ -290,7 +381,7 @@ Autonoma* createInputs(const char* inputFile) {
             }
             Texture *texture = parseTexture(f, false);
             Sphere* shape = new Sphere(Vector(sphere_x, sphere_y, sphere_z), texture, yaw, pitch, roll, radius);
-            MAIN_DATA->addShape(shape);
+            MAIN_DATA->addSphere(shape);
             shape->normalMap = parseTexture(f, true);
          } else if (streq(object_type, "mesh")) {
              char point_filepath[100];
@@ -323,7 +414,7 @@ Autonoma* createInputs(const char* inputFile) {
             Vector offset(off_x, off_y, off_z); 
             for(int i = 0; i<num_polygons; i++){
                Triangle* shape = new Triangle(points[polys[3*i]] + offset, points[polys[3*i+1]] + offset, points[polys[3*i+2]] + offset, texture);
-               MAIN_DATA->addShape(shape);
+               MAIN_DATA->addTriangle(shape);
                shape->normalMap = normalMap;
             }
          } else {
@@ -392,17 +483,7 @@ void setFrame(const char* animateFile, Autonoma* MAIN_DATA, int frame, int frame
                exit(1);
             }
          } else if (streq(object_type, "object")) {
-            ShapeNode* node = MAIN_DATA->listStart;
-            for (int i=0; i<obj_num; i++) {
-               if (node == MAIN_DATA->listEnd) {
-                  printf("Could not find object number %d\n", obj_num);
-                  exit(1);
-               }
-               if (i == obj_num)
-                  break;
-               node = node->next;
-            }
-            Shape* shape = node->data;
+            Shape* shape = MAIN_DATA->unifiedShapeList[obj_num];
 
             if (streq(field_type, "yaw")) {
                shape->setYaw(result);
