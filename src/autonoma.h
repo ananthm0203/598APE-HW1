@@ -22,6 +22,7 @@
         LOOP_OVER_BUCKET_LIST((autonoma).boxList, X)                                               \
         LOOP_OVER_BUCKET_LIST((autonoma).triangleList, X)                                          \
         LOOP_OVER_BUCKET_LIST((autonoma).sphereList, X)                                            \
+        LOOP_OVER_BUCKET_LIST((autonoma).planeList, X)                                             \
     } while (0);
 
 struct Autonoma {

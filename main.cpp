@@ -45,6 +45,10 @@ void set(int i, int j, unsigned char r, unsigned char g, unsigned char b) {
     DATA[3 * (i + j * W) + 2] = b;
 }
 
+#include <cassert>
+
+int hit_cnt = 0;
+
 void getLight(double* tColor, Autonoma* aut, Vector point, Vector norm, unsigned char flip) {
     tColor[0] = tColor[1] = tColor[2] = 0.;
     for (auto t : aut->unifiedLightList) {
@@ -54,12 +58,15 @@ void getLight(double* tColor, Autonoma* aut, Vector point, Vector norm, unsigned
         lightColor[2] = t->color[2] / 255.;
         Vector ra     = t->center - point;
         bool   hit    = false;
-        for (auto s : aut->unifiedShapeList) {
-            hit = s->getLightIntersection(Ray(point + ra * .01, ra), lightColor);
+        LOOP_OVER_SHAPES(
+            *aut,
+            hit = it.get()->getLightIntersection(Ray(point + ra * .01, ra), lightColor);
             if (hit) {
-                break;
+                ++hit_cnt;
+                goto _hit;
             }
-        }
+        )
+_hit:
         double perc = (norm.dot(ra) / (ra.mag() * norm.mag()));
         if (!hit) {
             if (flip && perc < 0)
@@ -144,6 +151,7 @@ void refresh(Autonoma* c) {
         Vector ra = c->camera.forward + ((double)(n % W) / W - .5) * ((c->camera.right)) +
                     (.5 - (double)(n / W) / H) * ((c->camera.up));
         calcColor(&DATA[3 * n], c, Ray(c->camera.focus, ra), 0);
+        // printf("%i\n", hit_cnt);
     }
 }
 
@@ -656,6 +664,7 @@ int main(int argc, const char** argv) {
 
     struct timeval start, end;
     gettimeofday(&start, NULL);
+    assert(MAIN_DATA->boxList.size + MAIN_DATA->planeList.size + MAIN_DATA->triangleList.size + MAIN_DATA->sphereList.size + MAIN_DATA->diskList.size == MAIN_DATA->unifiedShapeList.size());
     for (frame = 0; frame < frameLen; frame++) {
         setFrame(animateFile, MAIN_DATA, frame, frameLen);
         if (frameLen == 1) {
