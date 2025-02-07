@@ -6,8 +6,7 @@
 
 template <typename T> struct Bucket { std::unique_ptr<T[]> items; };
 
-template <typename T, size_t bucket_size>
-class BucketList {
+template <typename T, size_t bucket_size> class BucketList {
 public:
     BucketList() : size(0) {}
 
@@ -34,9 +33,7 @@ public:
         size_t                         list_size;
     };
 
-    iterator begin() {
-        return iterator(buckets.begin(), size);
-    }
+    iterator begin() { return iterator(buckets.begin(), size); }
 
     T* add(T&& elem) {
         if (size % bucket_size == 0) {

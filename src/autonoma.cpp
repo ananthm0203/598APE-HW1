@@ -14,27 +14,27 @@ void Autonoma::addLight(Light* l) {
     unifiedLightList.push_back(l);
 }
 
-void Autonoma::addBox(Box* list_ptr) {
-	// Box* list_ptr = boxList.add(std::move(s));
-	unifiedShapeList.push_back(list_ptr);
+void Autonoma::addBox(Box&& s) {
+    Box* list_ptr = boxList.add(std::move(s));
+    unifiedShapeList.push_back(list_ptr);
 }
 
-void Autonoma::addDisk(Disk* list_ptr) {
-	// Disk* list_ptr = diskList.add(std::move(s));
-	unifiedShapeList.push_back(list_ptr);
+void Autonoma::addDisk(Disk&& s) {
+    Disk* list_ptr = diskList.add(std::move(s));
+    unifiedShapeList.push_back(list_ptr);
 }
 
-void Autonoma::addTriangle(Triangle* list_ptr) {
-	// Triangle* list_ptr = triangleList.add(std::move(s));
-	unifiedShapeList.push_back(list_ptr);
+void Autonoma::addTriangle(Triangle&& s) {
+    Triangle* list_ptr = triangleList.add(std::move(s));
+    unifiedShapeList.push_back(list_ptr);
 }
 
-void Autonoma::addSphere(Sphere* list_ptr) {
-	// Sphere* list_ptr = sphereList.add(std::move(s));
-	unifiedShapeList.push_back(list_ptr);
+void Autonoma::addSphere(Sphere&& s) {
+    Sphere* list_ptr = sphereList.add(std::move(s));
+    unifiedShapeList.push_back(list_ptr);
 }
 
-void Autonoma::addPlane(Plane* list_ptr) {
-	// Plane* list_ptr = planeList.add(std::move(s));
-	unifiedShapeList.push_back(list_ptr);
+void Autonoma::addPlane(Plane&& s) {
+    Plane* list_ptr = planeList.add(std::move(s));
+    unifiedShapeList.push_back(list_ptr);
 }

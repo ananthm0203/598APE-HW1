@@ -5,7 +5,6 @@
 #include "camera.h"
 #include "vector.h"
 
-
 #include <memory>
 #include <vector>
 

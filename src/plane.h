@@ -9,11 +9,11 @@ public:
     double d;
     Plane(const Vector& c, Texture* t, double ya, double pi, double ro, double tx, double ty);
     Plane() = default;
-    double getIntersection(Ray ray);
-    bool   getLightIntersection(Ray ray, double* toFill);
-    void   move();
-    void getColor(unsigned char* toFill, double* am, double* op, double* ref, Ray ray,
-                  unsigned int depth);
+    double        getIntersection(Ray ray);
+    bool          getLightIntersection(Ray ray, double* toFill);
+    void          move();
+    void          getColor(unsigned char* toFill, double* am, double* op, double* ref, Ray ray,
+                           unsigned int depth);
     Vector        getNormal(Vector point);
     unsigned char reversible();
     void          setAngles(double yaw, double pitch, double roll);

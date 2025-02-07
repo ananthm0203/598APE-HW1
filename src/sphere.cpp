@@ -56,8 +56,8 @@ unsigned char Sphere::reversible() {
     return 0;
 }
 
-void Sphere::getColor(unsigned char* toFill, double* amb, double* op, double* ref,
-                      Ray ray, unsigned int depth) {
+void Sphere::getColor(unsigned char* toFill, double* amb, double* op, double* ref, Ray ray,
+                      unsigned int depth) {
     double data3 = (center.y - ray.point.y + radius) / (2 * radius);
     double data2 = atan2(ray.point.z - center.z, ray.point.x - center.x);
     texture->getColor(toFill, amb, op, ref, fix((yaw + data2) / M_TWO_PI / textureX),
