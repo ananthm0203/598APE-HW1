@@ -3,12 +3,13 @@
 Box::Box(const Vector &c, Texture* t, double ya, double pi, double ro, double tx, double ty):Plane(c, t, ya, pi, ro, tx, ty){}
 Box::Box(const Vector &c, Texture* t, double ya, double pi, double ro, double tx):Plane(c, t, ya, pi, ro, tx,tx){}
 
-double Box::getIntersection(Ray ray){
-   double time = Plane::getIntersection(ray);
+double Box::getIntersection(Ray ray, Shape** hitShape){
+   double time = Plane::getIntersection(ray, hitShape);
+   if(time == inf) return time;
    Vector dist = solveScalers(right, up, vect, ray.point+ray.vector*time-center);
-   if(time==inf) 
-      return time;
-   return ( ((dist.x>=0)?dist.x:-dist.x)>textureX/2 || ((dist.y>=0)?dist.y:-dist.y)>textureY/2 )?inf:time;
+   if( ((dist.x>=0)?dist.x:-dist.x)>textureX/2 || ((dist.y>=0)?dist.y:-dist.y)>textureY/2 ) return inf;
+   *hitShape = this;
+   return time;
 }
 
 bool Box::getLightIntersection(Ray ray, double* fill){

@@ -16,6 +16,12 @@ all: $(SRC_DIR)texture $(OBJ_FILES)
 texture:
 	cd $(SRC_DIR)Textures && make
 
+$(OBJ_DIR)aabb.obj: $(SRC_DIR)aabb.cpp $(SRC_DIR)aabb.h
+	$(FUNC) $(output)$(OBJ_DIR)aabb.obj $(copt) $(SRC_DIR)aabb.cpp $(FLAGS)
+
+$(OBJ_DIR)bvh.obj: $(SRC_DIR)bvh.cpp $(SRC_DIR)bvh.h
+	$(FUNC) $(output)$(OBJ_DIR)bvh.obj $(copt) $(SRC_DIR)bvh.cpp $(FLAGS)
+
 $(OBJ_DIR)vector.obj: $(SRC_DIR)vector.cpp $(SRC_DIR)vector.h
 	$(FUNC) $(output)$(OBJ_DIR)vector.obj $(copt) $(SRC_DIR)vector.cpp $(FLAGS)
 

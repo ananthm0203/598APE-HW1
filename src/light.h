@@ -4,6 +4,7 @@
 #include "camera.h"
 #include "Textures/texture.h"
 #include "Textures/colortexture.h"
+#include "bvh.h"
 
 class Light{
   public:
@@ -31,8 +32,11 @@ public:
    unsigned int depth;
    ShapeNode *listStart, *listEnd;
    LightNode *lightStart, *lightEnd;
+   std::unique_ptr<BVH> bvh;
+
    Autonoma(const Camera &c);
    Autonoma(const Camera &c, Texture* tex);
+   
    void addShape(Shape* s);
    void removeShape(ShapeNode* s);
    void addLight(Light* s);

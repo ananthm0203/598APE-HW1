@@ -5,8 +5,9 @@
 class Sphere : public Shape{
 public:
   double radius;
+
   Sphere(const Vector &c, Texture* t, double ya, double pi, double ro, double radius);
-  double getIntersection(Ray ray);
+  double getIntersection(Ray ray, Shape** hitShape);
   void move();
   bool getLightIntersection(Ray ray, double* fill);
   void getColor(unsigned char* toFill, double* am, double* op, double* ref, Autonoma* r, Ray ray, unsigned int depth);
@@ -16,5 +17,9 @@ public:
   void setYaw(double a);
   void setPitch(double b);
   void setRoll(double c);
+  virtual AABB getBounds() const override {
+    Vector radius_vec(radius, radius, radius);
+    return AABB(center - radius_vec, center + radius_vec);
+  }
 };
 #endif

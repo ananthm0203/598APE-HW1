@@ -6,7 +6,7 @@ class Camera{
 public:
    Vector focus, right, up, forward;
    double xcos, xsin, ycos, ysin, zcos, zsin;
-   Camera(const Vector & cente);
+   Camera(const Vector & center);
   
    Camera(const Vector &f, double a, double b, double c);
 

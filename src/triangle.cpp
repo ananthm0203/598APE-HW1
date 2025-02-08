@@ -38,13 +38,14 @@ Triangle::Triangle(Vector c, Vector b, Vector a, Texture* t):Plane(Vector(0,0,0)
    d = -vect.dot(center);
 }
 
-double Triangle::getIntersection(Ray ray){
-   double time = Plane::getIntersection(ray);
-   if(time==inf) 
-      return time;
+double Triangle::getIntersection(Ray ray, Shape** hitShape){
+   double time = Plane::getIntersection(ray, hitShape);
+   if(time==inf) return time;
    Vector dist = solveScalers(right, up, vect, ray.point+ray.vector*time-center); 
-   unsigned char tmp = (thirdX - dist.x) * textureY + (thirdX-textureX) * (dist.y - textureY) < 0.0;
-   return((tmp!=(textureX * dist.y < 0.0)) || (tmp != (dist.x * textureY - thirdX * dist.y < 0.0)))?inf:time;
+   unsigned char tmp = (thirdX - dist.x) * textureY + (thirdX-textureX) * (dist.y - textureY) < 0.0;  
+   if((tmp!=(textureX * dist.y < 0.0)) || (tmp != (dist.x * textureY - thirdX * dist.y < 0.0))) return inf;
+   *hitShape = this;
+   return time;
 }
 
 bool Triangle::getLightIntersection(Ray ray, double* fill){

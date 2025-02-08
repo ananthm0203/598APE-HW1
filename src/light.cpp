@@ -114,12 +114,8 @@ void getLight(double* tColor, Autonoma* aut, Vector point, Vector norm, unsigned
       lightColor[1] = t->data->color[1]/255.;
       lightColor[2] = t->data->color[2]/255.;
       Vector ra = t->data->center-point;
-      ShapeNode* shapeIter = aut->listStart;
-      bool hit = false;
-      while(!hit && shapeIter!=NULL){
-        hit = shapeIter->data->getLightIntersection(Ray(point+ra*.01, ra), lightColor);
-         shapeIter = shapeIter->next;
-      }
+
+      bool hit = aut->bvh->getLightIntersection(Ray(point+ra*.01, ra), lightColor);
       double perc = (norm.dot(ra)/(ra.mag()*norm.mag()));
       if(!hit){
       if(flip && perc<0) perc=-perc;

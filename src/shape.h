@@ -1,6 +1,7 @@
 #ifndef __SHAPE_H__
 #define __SHAPE_H__
 #include "light.h"
+#include <algorithm>
 
 class Shape{
   public:
@@ -10,7 +11,8 @@ class Shape{
    Texture* texture;
    double textureX, textureY, mapX, mapY, mapOffX, mapOffY;
    Texture* normalMap;
-   virtual double getIntersection(Ray ray) = 0;
+
+   virtual double getIntersection(Ray ray, Shape** hitShape) = 0;
    virtual bool getLightIntersection(Ray ray, double* fill) = 0;
    virtual void move() = 0;
    virtual unsigned char reversible() = 0;
@@ -20,6 +22,7 @@ class Shape{
    virtual void setYaw(double d) = 0;
    virtual void setPitch(double d) = 0;
    virtual void setRoll(double d) = 0;
+   virtual AABB getBounds() const = 0;
 };
 
 void calcColor(unsigned char* toFill, Autonoma*, Ray ray, unsigned int depth);

@@ -1,0 +1,13 @@
+# Build artifacts
+*.o
+*.obj
+*.exe
+*.out
+*.ppm
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.data
+*.txt

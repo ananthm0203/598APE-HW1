@@ -29,7 +29,7 @@ bool Sphere::getLightIntersection(Ray ray, double* fill){
    fill[2]*=temp[2]/255.;
    return false;
 }
-double Sphere::getIntersection(Ray ray){
+double Sphere::getIntersection(Ray ray, Shape** hitShape){
    const double A = ray.vector.mag2();
    const double B = 2*ray.vector.dot(ray.point-center);
    const double C = (ray.point-center).mag2()-radius*radius;
@@ -39,7 +39,11 @@ double Sphere::getIntersection(Ray ray){
       const double desc = sqrt(descriminant);
       const double root1 = (-B-desc)/(2*A);
       const double root2 = (-B+desc)/(2*A);
-      return (root1>0)?(root1):((root2>0)?root2:inf);
+      double time = (root1>0)?(root1):((root2>0)?root2:inf);
+      if(time != inf){
+        *hitShape = this;
+      }
+      return time;
    }
 }
 void Sphere::move(){

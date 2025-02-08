@@ -1,5 +1,7 @@
 //#include<printf.h>
+#include <vector>
 #include "src/vector.h"
+#include "src/bvh.h"
 #include "src/shape.h"
 #include "src/sphere.h"
 #include "src/plane.h"
@@ -13,9 +15,10 @@
 #include<stdlib.h>
 #include <string.h>
 #include <iostream>
-using namespace std;
-
 #include <sys/time.h>
+#include <memory>
+
+using namespace std;
 
 float tdiff(struct timeval *start, struct timeval *end) {
   return (end->tv_sec-start->tv_sec) + 1e-6*(end->tv_usec-start->tv_usec);
@@ -48,8 +51,9 @@ void set(int i, int j, unsigned char r, unsigned char g, unsigned char b){
 void refresh(Autonoma* c){
    for(int n = 0; n<H*W; ++n) 
    { 
+      //3 * n is bad in args
       Vector ra = c->camera.forward+((double)(n%W)/W-.5)*((c->camera.right))+(.5-(double)(n/W)/H)*((c->camera.up));
-      calcColor(&DATA[3*n], c, Ray(c->camera.focus, ra), 0);
+      calcColor(&DATA[3*n], c, Ray(c->camera.focus, ra), 0); //major overhead here with pushing arg
    }
 }
 
@@ -220,6 +224,7 @@ Autonoma* createInputs(const char* inputFile) {
    }
    Autonoma* MAIN_DATA = new Autonoma(Camera(Vector(camera_x, camera_y, camera_z), yaw, pitch, roll),background);
 
+   std::vector<Shape*> shapes;
    if (f) {
       char object_type[80];
       while (lscanf(f, "%s", object_type) != EOF) {
@@ -332,6 +337,12 @@ Autonoma* createInputs(const char* inputFile) {
          }
       }
    }
+
+   for (ShapeNode* node = MAIN_DATA->listStart; node != nullptr; node = node->next) {
+      shapes.push_back(node->data);
+   }
+   
+   MAIN_DATA->bvh = std::make_unique<BVH>(shapes);
 
    return MAIN_DATA;
 }

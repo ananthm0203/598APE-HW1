@@ -2,12 +2,13 @@
 Disk::Disk(const Vector &c, Texture* t, double ya, double pi, double ro, double tx, double ty):Plane(c, t, ya, pi, ro, tx, ty){}
 
 
-double Disk::getIntersection(Ray ray){
-   double time = Plane::getIntersection(ray);
-   if(time==inf) 
-      return time;
+double Disk::getIntersection(Ray ray, Shape** hitShape){
+   double time = Plane::getIntersection(ray, hitShape);
+   if(time==inf) return time; 
    Vector dist = solveScalers(right, up, vect, ray.point+ray.vector*time-center);
-   return (  dist.x*dist.x/(textureX*textureX)+dist.y*dist.y/(textureY*textureY)>1  )?inf:time;
+   if(  dist.x*dist.x/(textureX*textureX)+dist.y*dist.y/(textureY*textureY)>1  ) return inf;
+   *hitShape = this;
+   return time;
 }
 
 bool Disk::getLightIntersection(Ray ray, double* fill){
