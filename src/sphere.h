@@ -7,16 +7,16 @@ public:
   double radius;
 
   Sphere(const Vector &c, Texture* t, double ya, double pi, double ro, double radius);
-  double getIntersection(Ray ray, Shape** hitShape);
-  void move();
-  bool getLightIntersection(Ray ray, double* fill);
-  void getColor(unsigned char* toFill, double* am, double* op, double* ref, Autonoma* r, Ray ray, unsigned int depth);
-  Vector getNormal(Vector point);
-  unsigned char reversible();
-  void setAngles(double a, double b, double c);
-  void setYaw(double a);
-  void setPitch(double b);
-  void setRoll(double c);
+  double getIntersection(Ray ray, Shape** hitShape) override;
+  void move() override;
+  bool getLightIntersection(Ray ray, double* fill) override;
+  void getColor(unsigned char* toFill, double* am, double* op, double* ref, Autonoma* r, Ray ray, unsigned int depth) override;
+  Vector getNormal(Vector point) override;
+  unsigned char reversible() override;
+  void setAngles(double a, double b, double c) override;
+  void setYaw(double a) override;
+  void setPitch(double b) override;
+  void setRoll(double c) override;
   virtual AABB getBounds() const override {
     Vector radius_vec(radius, radius, radius);
     return AABB(center - radius_vec, center + radius_vec);

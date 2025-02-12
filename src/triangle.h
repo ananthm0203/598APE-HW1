@@ -6,8 +6,8 @@ class Triangle : public Plane{
 public:
    double thirdX;
    Triangle(Vector c, Vector b, Vector a, Texture* t);
-   double getIntersection(Ray ray, Shape** hitShape);
-   bool getLightIntersection(Ray ray, double* fill);
+   double getIntersection(Ray ray, Shape** hitShape) override;
+   bool getLightIntersection(Ray ray, double* fill) override;
    virtual AABB getBounds() const override {
        Vector v1 = center;
        Vector v2 = center + right * textureX;

@@ -5,8 +5,8 @@
 class Disk : public Plane{
 public:
   Disk(const Vector &c, Texture* t, double ya, double pi, double ro, double tx, double ty);
-  double getIntersection(Ray ray, Shape** hitShape);
-  bool getLightIntersection(Ray ray, double* fill);
+  double getIntersection(Ray ray, Shape** hitShape) override;
+  bool getLightIntersection(Ray ray, double* fill) override;
   virtual AABB getBounds() const override {
     Vector radius_vec(textureX, textureY, 0.01);  // Small thickness in normal direction
     Vector rotated_min = center;
