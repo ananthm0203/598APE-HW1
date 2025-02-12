@@ -1,18 +1,18 @@
 #ifndef __BVH_H__
 #define __BVH_H__
 
+#include "aabb.h" // Include full AABB definition
 #include "light.h"
 #include "shape.h"
-#include "aabb.h"  // Include full AABB definition
-#include <vector>
 #include <memory>
+#include <vector>
 
 class BVHNode {
 public:
-    AABB bounds;
+    AABB                     bounds;
     std::unique_ptr<BVHNode> left;
     std::unique_ptr<BVHNode> right;
-    Shape* shape;
+    Shape*                   shape;
 
     BVHNode() : bounds(), left(nullptr), right(nullptr), shape(nullptr) {}
     ~BVHNode() {}
@@ -23,13 +23,14 @@ class BVH {
 public:
     BVH(std::vector<std::unique_ptr<Shape>>& shapes);
     double getIntersection(const Ray& ray, Shape** hitShape) const;
-    bool getLightIntersection(const Ray& ray, double* fill) const;
+    bool   getLightIntersection(const Ray& ray, double* fill) const;
 
 private:
     std::unique_ptr<BVHNode> root;
-    std::unique_ptr<BVHNode> buildBVH(std::vector<std::unique_ptr<Shape>>& shapes, int start, int end);
+    std::unique_ptr<BVHNode> buildBVH(std::vector<std::unique_ptr<Shape>>& shapes, int start,
+                                      int end);
     double getNodeIntersection(const BVHNode* node, const Ray& ray, Shape** hitShape) const;
-    bool getNodeLightIntersection(const BVHNode* node, const Ray& ray, double* fill) const;
+    bool   getNodeLightIntersection(const BVHNode* node, const Ray& ray, double* fill) const;
 };
 
 #endif
