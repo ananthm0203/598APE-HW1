@@ -3,7 +3,7 @@ output := -o
 copt := -c 
 SRC_DIR := ./
 OBJ_DIR := ./
-FLAGS := -O0 -g -Werror
+FLAGS := -O3 -g -Werror
 
 CPP_FILES := $(wildcard *.cpp)
 OBJ_FILES := $(addprefix $(OBJ_DIR),$(notdir $(CPP_FILES:.cpp=.obj)))
@@ -51,6 +51,9 @@ $(OBJ_DIR)hyperboloid.obj: $(SRC_DIR)hyperboloid.cpp $(SRC_DIR)hyperboloid.h $(O
 
 $(OBJ_DIR)pictplane.obj: $(SRC_DIR)pictplane.cpp $(SRC_DIR)pictplane.h $(OBJ_DIR)plane.obj
 	$(FUNC) $(output)$(OBJ_DIR)pictplane.obj $(copt) $(SRC_DIR)pictplane.cpp $(FLAGS)
+
+$(OBJ_DIR)autonoma.obj: $(SRC_DIR)autonoma.cpp $(SRC_DIR)autonoma.h
+	$(FUNC) $(output)$(OBJ_DIR)autonoma.obj $(copt) $(SRC_DIR)autonoma.cpp $(FLAGS)
 
 $(OBJ_DIR)box.obj: $(SRC_DIR)box.cpp $(SRC_DIR)box.h $(OBJ_DIR)plane.obj
 	$(FUNC) $(output)$(OBJ_DIR)box.obj $(copt) $(SRC_DIR)box.cpp $(FLAGS)

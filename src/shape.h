@@ -1,11 +1,13 @@
 #ifndef __SHAPE_H__
 #define __SHAPE_H__
 #include "light.h"
+#include "aabb.h"
 #include <algorithm>
 
 class Shape{
   public:
    Shape(const Vector &c, Texture* t, double ya, double pi, double ro);
+   virtual ~Shape() = default;
    double yaw, pitch, roll, xsin, xcos, ysin, ycos, zsin, zcos;
    Vector center;
    Texture* texture;
@@ -16,7 +18,7 @@ class Shape{
    virtual bool getLightIntersection(Ray ray, double* fill) = 0;
    virtual void move() = 0;
    virtual unsigned char reversible() = 0;
-   virtual void getColor(unsigned char* toFill, double* am, double* op, double* ref, Autonoma* r, Ray ray, unsigned int depth) = 0;
+   virtual void getColor(unsigned char* toFill, double* am, double* op, double* ref, Ray ray, unsigned int depth) = 0;
    virtual Vector getNormal(Vector point) = 0;
    virtual void setAngles(double yaw, double pitch, double roll) = 0;
    virtual void setYaw(double d) = 0;
@@ -24,7 +26,5 @@ class Shape{
    virtual void setRoll(double d) = 0;
    virtual AABB getBounds() const = 0;
 };
-
-void calcColor(unsigned char* toFill, Autonoma*, Ray ray, unsigned int depth);
 
 #endif

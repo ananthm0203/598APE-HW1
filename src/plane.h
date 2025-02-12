@@ -11,7 +11,7 @@ public:
   double getIntersection(Ray ray, Shape** hitShape) override;
   bool getLightIntersection(Ray ray, double* toFill) override;
   void move() override;
-  void getColor(unsigned char* toFill, double* am, double* op, double* ref, Autonoma* r, Ray ray, unsigned int depth) override;
+  void getColor(unsigned char* toFill, double* am, double* op, double* ref, Ray ray, unsigned int depth) override;
   Vector getNormal(Vector point) override;
   unsigned char reversible() override;
   void setAngles(double yaw, double pitch, double roll) override;

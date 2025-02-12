@@ -4,17 +4,17 @@
 #include <algorithm>
 #include <memory>
 
-BVH::BVH(std::vector<Shape*>& shapes) {
+BVH::BVH(std::vector<std::unique_ptr<Shape>>& shapes) {
     root = buildBVH(shapes, 0, shapes.size());
 }
 
-std::unique_ptr<BVHNode> BVH::buildBVH(std::vector<Shape*>& shapes, int start, int end) {
+std::unique_ptr<BVHNode> BVH::buildBVH(std::vector<std::unique_ptr<Shape>>& shapes, int start, int end) {
     auto node = std::make_unique<BVHNode>();
 
     int nShapes = end - start;
     if (nShapes == 1) {
         // Leaf node
-        node->shape = shapes.at(start);
+        node->shape = shapes.at(start).get();
         //will likely call copy constructor instead of move constructor
         //can figure out optimization later
         node->bounds = node->shape->getBounds();
@@ -38,7 +38,7 @@ std::unique_ptr<BVHNode> BVH::buildBVH(std::vector<Shape*>& shapes, int start, i
     //partition shapes along the chosen axis, no need to sort fully
     //doing some pointer chasing here, can focus on fixing later once bvh is working
     std::nth_element(shapes.begin() + start, shapes.begin() + mid, shapes.begin() + end,
-                    [axis](const Shape* a, const Shape* b) {
+                    [axis](const std::unique_ptr<Shape>& a, const std::unique_ptr<Shape>& b) {
                         return a->getBounds().min[axis] < b->getBounds().min[axis];
                     });
 
