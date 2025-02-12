@@ -3,11 +3,20 @@
 *.obj
 *.exe
 *.out
+
+# Output directory
+output/**
+
+# Output file formats
 *.ppm
 *.png
 *.jpg
 *.jpeg
 *.gif
 *.bmp
-*.data
+*.mp4
+*.avi
+
+# Performance and log data
+*.data*
 *.txt
