@@ -1,13 +1,13 @@
 #include "imagetexture.h"
 
-void ImageTexture::getColor(unsigned char* toFill, double* am, double* op, double* ref, double x,
-                            double y) {
+void ImageTexture::getColor(unsigned char* toFill, fixed_t* am, fixed_t* op, fixed_t* ref,
+                            fixed_t x, fixed_t y) {
     int xi = (int)(x * w), yi = (int)(y * h);
     int p1    = 4 * (xi + w * yi);
     toFill[0] = imageData[p1];
     toFill[1] = imageData[p1 + 1];
     toFill[2] = imageData[p1 + 2];
-    *op       = imageData[p1 + 3] * opacity / 255.;
+    *op       = imageData[p1 + 3] * opacity / fixed_t(255);
     *ref      = reflection;
     *am       = ambient;
 }
@@ -128,13 +128,13 @@ void ImageTexture::maskImage(ColorTexture* b) {
         }
 }
 
-void ImageTexture::getColor(unsigned char* toFill, double* am, double* op, double* ref,
+void ImageTexture::getColor(unsigned char* toFill, fixed_t* am, fixed_t* op, fixed_t* ref,
                             unsigned int x, unsigned int y) {
     int start = 4 * (x + w * y);
     toFill[0] = imageData[start];
     toFill[1] = imageData[start + 1];
     toFill[2] = imageData[start + 2];
-    *op       = imageData[start + 3] * opacity / 255.;
+    *op       = imageData[start + 3] * opacity / fixed_t(255);
     *ref      = reflection;
     *am       = ambient;
 }

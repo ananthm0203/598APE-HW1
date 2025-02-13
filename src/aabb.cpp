@@ -2,22 +2,37 @@
 #include <algorithm>
 
 bool AABB::intersect(const Ray& ray) const {
-    double tx1  = (min.x - ray.point.x) / ray.vector.x;
-    double tx2  = (max.x - ray.point.x) / ray.vector.x;
-    double tmin = std::min(tx1, tx2);
-    double tmax = std::max(tx1, tx2);
+    fixed_t tx1 = (min.x - ray.point.x) / ray.vector.x;
+    fixed_t tx2 = (max.x - ray.point.x) / ray.vector.x;
 
-    double ty1 = (min.y - ray.point.y) / ray.vector.y;
-    double ty2 = (max.y - ray.point.y) / ray.vector.y;
-    tmin       = std::max(tmin, std::min(ty1, ty2));
-    tmax       = std::min(tmax, std::max(ty1, ty2));
+    fixed_t ty1 = (min.y - ray.point.y) / ray.vector.y;
+    fixed_t ty2 = (max.y - ray.point.y) / ray.vector.y;
 
-    double tz1 = (min.z - ray.point.z) / ray.vector.z;
-    double tz2 = (max.z - ray.point.z) / ray.vector.z;
-    tmin       = std::max(tmin, std::min(tz1, tz2));
-    tmax       = std::min(tmax, std::max(tz1, tz2));
+    fixed_t tz1 = (min.z - ray.point.z) / ray.vector.z;
+    fixed_t tz2 = (max.z - ray.point.z) / ray.vector.z;
 
-    return tmax >= tmin && tmax > 0;
+    fixed_t tmin = std::min(tx1, tx2);
+    fixed_t tmax = std::max(tx1, tx2);
+
+    // tmin = std::max(tmin, std::min(ty1, ty2));
+    // tmax = std::min(tmax, std::max(ty1, ty2));
+
+    // tmin = std::max(tmin, std::min(tz1, tz2));
+    // tmax = std::min(tmax, std::max(tz1, tz2));
+
+    fixed_t ymin = std::min(ty1, ty2);
+    fixed_t ymax = std::max(ty1, ty2);
+
+    tmin = std::max(tmin, ymin);
+    tmax = std::min(tmax, ymax);
+
+    fixed_t zmin = std::min(tz1, tz2);
+    fixed_t zmax = std::max(tz1, tz2);
+
+    tmin = std::max(tmin, zmin);
+    tmax = std::min(tmax, zmax);
+
+    return tmax >= tmin && tmax > fixed_t(0);
 }
 
 void AABB::expand(const AABB& other) {

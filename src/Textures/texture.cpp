@@ -1,22 +1,22 @@
 #include "texture.h"
 
-double interpolate(double a, double b, double x) {
-    double f = (1.0 - cos(x * M_PI)) * 0.5;
-    return a * (1.0 - f) + b * f;
+fixed_t interpolate(fixed_t a, fixed_t b, fixed_t x) {
+    fixed_t f = (fixed_t(1.0) - cos(x * fixed_t(M_PI))) * fixed_t(0.5);
+    return a * (fixed_t(1.0) - f) + b * f;
 }
 
 Texture::Texture(double am, double op, double ref) : ambient(am), opacity(op), reflection(ref) {
 }
 
-double fix(double a) {
-    a = fmod(a, 1.);
-    if (a < 0)
-        a += 1.;
+fixed_t fix(fixed_t a) {
+    a = fmod(a, fixed_t(1));
+    if (a < fixed_t(0))
+        a += fixed_t(1);
     return a;
 }
 
-double ground(double e) {
-    return (e > 1.) ? 1. : e;
+fixed_t ground(fixed_t e) {
+    return (e > fixed_t(1)) ? fixed_t(1) : e;
 }
 const char* findExtension(const char* ola) {
     const char* end = ola;

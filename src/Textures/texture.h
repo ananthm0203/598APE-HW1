@@ -7,24 +7,26 @@
 #include <stdio.h>
 #include <stdlib.h>
 #define _USE_MATH_DEFINES
+#include "../fpm/math.h"
+#include "../vector.h"
 #include <cmath>
 class Texture {
 public:
     /** from 0 to 1 **/
-    double opacity, reflection, ambient;
+    fixed_t opacity, reflection, ambient;
     Texture(double am, double op, double ref);
-    virtual void getColor(unsigned char* toFill, double* am, double* opacity, double* reflection,
-                          double x, double y) = 0;
+    virtual void getColor(unsigned char* toFill, fixed_t* am, fixed_t* opacity, fixed_t* reflection,
+                          fixed_t x, fixed_t y) = 0;
     Texture*     clone();
 };
 
-double interpolate(double a, double b, double x);
+fixed_t interpolate(fixed_t a, fixed_t b, fixed_t x);
 
 const char* findExtension(const char* s);
 
-double ground(double e);
+fixed_t ground(fixed_t e);
 
-double fix(double a);
+fixed_t fix(fixed_t a);
 
 char lowerCase(char c);
 

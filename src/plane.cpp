@@ -1,16 +1,17 @@
 #include "plane.h"
+#include "vector.h"
 
 Plane::Plane(const Vector& c, Texture* t, double ya, double pi, double ro, double tx, double ty)
     : Shape(c, t, ya, pi, ro), vect(c), right(c), up(c) {
-    textureX = tx;
-    textureY = ty;
+    textureX = fixed_t(tx);
+    textureY = fixed_t(ty);
     setAngles(yaw, pitch, roll);
     normalMap = NULL;
     mapX      = textureX;
     mapY      = textureY;
 }
 
-void Plane::setAngles(double a, double b, double c) {
+void Plane::setAngles(fixed_t a, fixed_t b, fixed_t c) {
     yaw     = a;
     pitch   = b;
     roll    = c;
@@ -32,8 +33,8 @@ void Plane::setAngles(double a, double b, double c) {
     d       = -vect.dot(center);
 }
 
-void Plane::setYaw(double a) {
-    yaw  = a;
+void Plane::setYaw(fixed_t a) {
+    yaw  = fixed_t(a);
     xcos = cos(yaw);
     xsin = sin(yaw);
 
@@ -49,7 +50,7 @@ void Plane::setYaw(double a) {
     d       = -vect.dot(center);
 }
 
-void Plane::setPitch(double b) {
+void Plane::setPitch(fixed_t b) {
     pitch  = b;
     ycos   = cos(pitch);
     ysin   = sin(pitch);
@@ -62,7 +63,7 @@ void Plane::setPitch(double b) {
     d      = -vect.dot(center);
 }
 
-void Plane::setRoll(double c) {
+void Plane::setRoll(fixed_t c) {
     roll   = c;
     zcos   = cos(roll);
     zsin   = sin(roll);
@@ -78,47 +79,49 @@ void Plane::setRoll(double c) {
     d = -vect.dot(center);
 }
 
-double Plane::getIntersection(Ray ray, Shape** hitShape) {
-    const double t    = ray.vector.dot(vect);
-    const double norm = vect.dot(ray.point) + d;
-    const double r    = -norm / t;
-    if (r > 0) {
+fixed_t Plane::getIntersection(Ray ray, Shape** hitShape) {
+    const fixed_t t    = ray.vector.dot(vect);
+    const fixed_t norm = vect.dot(ray.point) + d;
+    const fixed_t r    = -norm / t;
+    if (r > fixed_t(0)) {
         *hitShape = this;
         return r;
     }
-    return inf;
+    return fixed_t(inf);
 }
 
-bool Plane::getLightIntersection(Ray ray, double* fill) {
-    const double t    = ray.vector.dot(vect);
-    const double norm = vect.dot(ray.point) + d;
-    const double r    = -norm / t;
-    if (r <= 0. || r >= 1.)
+bool Plane::getLightIntersection(Ray ray, fixed_t* fill) {
+    const fixed_t t    = ray.vector.dot(vect);
+    const fixed_t norm = vect.dot(ray.point) + d;
+    const fixed_t r    = -norm / t;
+    if (r <= fixed_t(0) || r >= fixed_t(1))
         return false;
 
-    if (texture->opacity > 1 - 1E-6)
+    if (texture->opacity > fixed_t(1) - fixed_t(1E-6))
         return true;
     Vector        dist = solveScalers(right, up, vect, ray.point - center);
     unsigned char temp[4];
-    double        amb, op, ref;
-    texture->getColor(temp, &amb, &op, &ref, fix(dist.x / textureX - .5),
-                      fix(dist.y / textureY - .5));
-    if (op > 1 - 1E-6)
+    fixed_t       amb, op, ref;
+
+    // QUESTIONABLE AF, LAZINESS TO MODIFY TEXTURE, WILL DO IF NECESSARY
+    texture->getColor(temp, &amb, &op, &ref, dist.x / textureX - fixed_t(0.5),
+                      dist.y / textureY - fixed_t(0.5));
+    if (op > fixed_t(1) - fixed_t(1E-6))
         return true;
-    fill[0] *= temp[0] / 255.;
-    fill[1] *= temp[1] / 255.;
-    fill[2] *= temp[2] / 255.;
+    fill[0] *= temp[0] / fixed_t(255);
+    fill[1] *= temp[1] / fixed_t(255);
+    fill[2] *= temp[2] / fixed_t(255);
     return false;
 }
 
 void Plane::move() {
     d = -vect.dot(center);
 }
-void Plane::getColor(unsigned char* toFill, double* am, double* op, double* ref, Ray ray,
+void Plane::getColor(unsigned char* toFill, fixed_t* am, fixed_t* op, fixed_t* ref, Ray ray,
                      unsigned int depth) {
     Vector dist = solveScalers(right, up, vect, ray.point - center);
-    texture->getColor(toFill, am, op, ref, fix(dist.x / textureX - .5),
-                      fix(dist.y / textureY - .5));
+    texture->getColor(toFill, am, op, ref, dist.x / textureX - fixed_t(0.5),
+                      dist.y / textureY - fixed_t(0.5));
 }
 unsigned char Plane::reversible() {
     return 1;
@@ -129,10 +132,10 @@ Vector Plane::getNormal(Vector point) {
         return vect;
     else {
         Vector        dist = solveScalers(right, up, vect, point - center);
-        double        am, ref, op;
+        fixed_t       am, ref, op;
         unsigned char norm[3];
-        normalMap->getColor(norm, &am, &op, &ref, fix(dist.x / mapX - .5 + mapOffX),
-                            fix(dist.y / mapY - .5 + mapOffY));
+        normalMap->getColor(norm, &am, &op, &ref, dist.x / mapX - fixed_t(0.5) + mapOffX,
+                            dist.y / mapY - fixed_t(0.5) + mapOffY);
         Vector ret = ((norm[0] - 128) * right + (norm[1] - 128) * up + norm[2] * vect).normalize();
         return ret;
     }

@@ -37,7 +37,7 @@ int W = 1000, H = 1000;
 
 unsigned char* DATA = (unsigned char*)malloc(W * H * 3 * sizeof(unsigned char));
 unsigned char  get(int i, int j, int k) {
-    return DATA[3 * (i + j * W) + k];
+     return DATA[3 * (i + j * W) + k];
 }
 unsigned char* getPos(int i, int j) {
     return &DATA[3 * (i + j * W)];
@@ -48,70 +48,69 @@ void set(int i, int j, unsigned char r, unsigned char g, unsigned char b) {
     DATA[3 * (i + j * W) + 2] = b;
 }
 
-void getLight(double* tColor, Autonoma* aut, Vector point, Vector norm, unsigned char flip) {
-    tColor[0] = tColor[1] = tColor[2] = 0.;
+void getLight(fixed_t* tColor, Autonoma* aut, Vector point, Vector norm, unsigned char flip) {
+    tColor[0] = tColor[1] = tColor[2] = fixed_t(0);
     for (const auto& light : aut->lights) {
-        double lightColor[3];
-        lightColor[0] = light->color[0] / 255.;
-        lightColor[1] = light->color[1] / 255.;
-        lightColor[2] = light->color[2] / 255.;
+        fixed_t lightColor[3];
+        lightColor[0] = light->color[0] / fixed_t(255.);
+        lightColor[1] = light->color[1] / fixed_t(255.);
+        lightColor[2] = light->color[2] / fixed_t(255.);
         Vector ra     = light->center - point;
 
-        bool   hit  = aut->bvh->getLightIntersection(Ray(point + ra * .01, ra), lightColor);
-        double perc = (norm.dot(ra) / (ra.mag() * norm.mag()));
+        bool    hit  = aut->bvh->getLightIntersection(Ray(point + ra * .01, ra), lightColor);
+        fixed_t perc = (norm.dot(ra) / (ra.mag() * norm.mag()));
         if (!hit) {
-            if (flip && perc < 0)
+            if (flip && perc < fixed_t(0))
                 perc = -perc;
-            if (perc > 0) {
+            if (perc > fixed_t(0)) {
                 tColor[0] += perc * (lightColor[0]);
                 tColor[1] += perc * (lightColor[0]);
                 tColor[2] += perc * (lightColor[0]);
-                if (tColor[0] > 1.)
-                    tColor[0] = 1.;
-                if (tColor[1] > 1.)
-                    tColor[1] = 1.;
-                if (tColor[2] > 1.)
-                    tColor[2] = 1.;
+                if (tColor[0] > fixed_t(1))
+                    tColor[0] = fixed_t(1);
+                if (tColor[1] > fixed_t(1))
+                    tColor[1] = fixed_t(1);
+                if (tColor[2] > fixed_t(1))
+                    tColor[2] = fixed_t(1);
             }
         }
     }
 }
 
 void calcColor(unsigned char* toFill, Autonoma* c, Ray ray, unsigned int depth) {
-    Shape* hitShape = nullptr;
-    double time     = c->bvh->getIntersection(ray, &hitShape);
+    Shape*  hitShape = nullptr;
+    fixed_t time     = c->bvh->getIntersection(ray, &hitShape);
 
-    if (!hitShape || time == inf) {
-        double       opacity, reflection, ambient;
-        Vector       temp  = ray.vector.normalize();
-        const double x     = temp.x;
-        const double z     = temp.z;
-        const double me    = (temp.y < 0) ? -temp.y : temp.y;
-        const double angle = atan2(z, x);
-        c->skybox->getColor(toFill, &ambient, &opacity, &reflection, fix(angle / M_TWO_PI),
-                            fix(me));
+    if (!hitShape || time == fixed_t(inf)) {
+        fixed_t       opacity, reflection, ambient;
+        Vector        temp  = ray.vector.normalize();
+        const fixed_t x     = temp.x;
+        const fixed_t z     = temp.z;
+        const fixed_t me    = (temp.y < fixed_t(0)) ? -temp.y : temp.y;
+        const fixed_t angle = atan2(z, x);
+        c->skybox->getColor(toFill, &ambient, &opacity, &reflection, angle / fixed_t::two_pi(), me);
         return;
     }
 
-    Vector intersect = time * ray.vector + ray.point;
-    double opacity, reflection, ambient;
+    Vector  intersect = time * ray.vector + ray.point;
+    fixed_t opacity, reflection, ambient;
     hitShape->getColor(toFill, &ambient, &opacity, &reflection, Ray(intersect, ray.vector), depth);
 
-    double lightData[3];
+    fixed_t lightData[3];
     getLight(lightData, c, intersect, hitShape->getNormal(intersect), hitShape->reversible());
     toFill[0] = (unsigned char)(toFill[0] * (ambient + lightData[0] * (1 - ambient)));
     toFill[1] = (unsigned char)(toFill[1] * (ambient + lightData[1] * (1 - ambient)));
     toFill[2] = (unsigned char)(toFill[2] * (ambient + lightData[2] * (1 - ambient)));
-    if (depth < c->depth && (opacity < 1 - 1e-6 || reflection > 1e-6)) {
+    if (depth < c->depth && (opacity < 1 - fixed_t(1e-6) || reflection > fixed_t(1e-6))) {
         unsigned char col[4];
-        if (opacity < 1 - 1e-6) {
-            Ray nextRay = Ray(intersect + ray.vector * 1E-4, ray.vector);
+        if (opacity < 1 - fixed_t(1e-6)) {
+            Ray nextRay = Ray(intersect + ray.vector * fixed_t(1E-4), ray.vector);
             calcColor(col, c, nextRay, depth + 1);
             toFill[0] = (unsigned char)(toFill[0] * opacity + col[0] * (1 - opacity));
             toFill[1] = (unsigned char)(toFill[1] * opacity + col[1] * (1 - opacity));
             toFill[2] = (unsigned char)(toFill[2] * opacity + col[2] * (1 - opacity));
         }
-        if (reflection > 1e-6) {
+        if (reflection > fixed_t(1e-6)) {
             Vector norm    = hitShape->getNormal(intersect).normalize();
             Vector vec     = ray.vector - 2 * norm * (norm.dot(ray.vector));
             Ray    nextRay = Ray(intersect + vec * 1E-4, vec);
@@ -200,6 +199,7 @@ Texture* parseTexture(FILE* f, bool allowNull) {
             printf("Could not read <r> <g> <b> <opacity> <reflection> <ambient>\n");
             exit(1);
         }
+
         return new ColorTexture((unsigned char)r, (unsigned char)g, (unsigned char)b, opacity,
                                 reflection, ambient);
     }
@@ -240,9 +240,9 @@ Texture* parseTexture(FILE* f, bool allowNull) {
                 text->setColor(x, y, r, g, b);
             }
         }
-        text->opacity    = opacity;
-        text->reflection = reflection;
-        text->ambient    = ambient;
+        text->opacity    = fixed_t(opacity);
+        text->reflection = fixed_t(reflection);
+        text->ambient    = fixed_t(ambient);
         return text;
     }
 
@@ -258,9 +258,9 @@ Vector* getVectors(FILE* f, int len) {
             printf("Failed to read vectors\n");
             exit(1);
         }
-        vec[i].x = x;
-        vec[i].y = y;
-        vec[i].z = z;
+        vec[i].x = fixed_t(x);
+        vec[i].y = fixed_t(y);
+        vec[i].z = fixed_t(z);
     }
     return vec;
 }
@@ -486,7 +486,8 @@ void setFrame(const char* animateFile, Autonoma* MAIN_DATA, int frame, int frame
                        transition_type);
                 exit(1);
             }
-            double result = func((double)frame / frameLen, from, to);
+            double  result       = func((double)frame / frameLen, from, to);
+            fixed_t result_fixed = fixed_t(result);
 
             if (streq(object_type, "camera")) {
                 if (streq(field_type, "yaw")) {
@@ -496,11 +497,11 @@ void setFrame(const char* animateFile, Autonoma* MAIN_DATA, int frame, int frame
                 } else if (streq(field_type, "roll")) {
                     MAIN_DATA->camera.setRoll(result);
                 } else if (streq(field_type, "x")) {
-                    MAIN_DATA->camera.focus.x = result;
+                    MAIN_DATA->camera.focus.x = result_fixed;
                 } else if (streq(field_type, "y")) {
-                    MAIN_DATA->camera.focus.y = result;
+                    MAIN_DATA->camera.focus.y = result_fixed;
                 } else if (streq(field_type, "z")) {
-                    MAIN_DATA->camera.focus.z = result;
+                    MAIN_DATA->camera.focus.z = result_fixed;
                 } else {
                     printf("Unknown camera field_type %s, expected one of yaw, pitch, "
                            "roll, x, y, z\n",
@@ -511,23 +512,23 @@ void setFrame(const char* animateFile, Autonoma* MAIN_DATA, int frame, int frame
                 auto& shape = MAIN_DATA->shapes[obj_num];
 
                 if (streq(field_type, "yaw")) {
-                    shape->setYaw(result);
+                    shape->setYaw(result_fixed);
                 } else if (streq(field_type, "pitch")) {
-                    shape->setPitch(result);
+                    shape->setPitch(result_fixed);
                 } else if (streq(field_type, "roll")) {
-                    shape->setRoll(result);
+                    shape->setRoll(result_fixed);
                 } else if (streq(field_type, "textureX")) {
-                    shape->textureX = result;
+                    shape->textureX = result_fixed;
                 } else if (streq(field_type, "textureY")) {
-                    shape->textureY = result;
+                    shape->textureY = result_fixed;
                 } else if (streq(field_type, "mapX")) {
-                    shape->mapX = result;
+                    shape->mapX = result_fixed;
                 } else if (streq(field_type, "mapY")) {
-                    shape->mapY = result;
+                    shape->mapY = result_fixed;
                 } else if (streq(field_type, "mapOffX")) {
-                    shape->mapOffX = result;
+                    shape->mapOffX = result_fixed;
                 } else if (streq(field_type, "mapOffY")) {
-                    shape->mapOffY = result;
+                    shape->mapOffY = result_fixed;
                 } else {
                     printf("Unknown shape field_type %s, expected one of yaw, pitch, "
                            "roll, textureX, textureY, mapX, mapY, mapOffX, mapOffY\n",

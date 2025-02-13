@@ -5,7 +5,7 @@
 class Camera {
 public:
     Vector focus, right, up, forward;
-    double xcos, xsin, ycos, ysin, zcos, zsin;
+    fixed_t xcos, xsin, ycos, ysin, zcos, zsin;
     Camera(const Vector& center);
 
     Camera(const Vector& f, double a, double b, double c);
@@ -16,7 +16,7 @@ public:
     void setRoll(double b);
 
 private:
-    double yaw, pitch, roll;
+    fixed_t yaw, pitch, roll;
 };
 
 #endif

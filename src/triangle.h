@@ -4,10 +4,10 @@
 
 class Triangle : public Plane {
 public:
-    double thirdX;
+    fixed_t thirdX;
     Triangle(Vector c, Vector b, Vector a, Texture* t);
-    double       getIntersection(Ray ray, Shape** hitShape) override;
-    bool         getLightIntersection(Ray ray, double* fill) override;
+    fixed_t       getIntersection(Ray ray, Shape** hitShape) override;
+    bool         getLightIntersection(Ray ray, fixed_t* fill) override;
     virtual AABB getBounds() const override {
         Vector v1 = center;
         Vector v2 = center + right * textureX;

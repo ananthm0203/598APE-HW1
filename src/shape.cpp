@@ -3,7 +3,7 @@
 Shape::Shape(const Vector& c, Texture* t, double ya, double pi, double ro)
     : center(c), texture(t), yaw(ya), pitch(pi), roll(ro){};
 
-void Shape::setAngles(double a, double b, double c) {
+void Shape::setAngles(fixed_t a, fixed_t b, fixed_t c) {
     yaw   = a;
     pitch = b;
     roll  = c;
@@ -15,19 +15,19 @@ void Shape::setAngles(double a, double b, double c) {
     zsin  = sin(roll);
 }
 
-void Shape::setYaw(double a) {
+void Shape::setYaw(fixed_t a) {
     yaw  = a;
     xcos = cos(yaw);
     xsin = sin(yaw);
 }
 
-void Shape::setPitch(double b) {
+void Shape::setPitch(fixed_t b) {
     pitch = b;
     ycos  = cos(pitch);
     ysin  = sin(pitch);
 }
 
-void Shape::setRoll(double c) {
+void Shape::setRoll(fixed_t c) {
     roll = c;
     zcos = cos(roll);
     zsin = sin(roll);

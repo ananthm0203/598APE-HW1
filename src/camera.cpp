@@ -10,9 +10,9 @@ Camera::Camera(const Vector& f, double a, double b, double c)
 }
 
 void Camera::setAngles(double a, double b, double c) {
-    yaw   = a;
-    pitch = b;
-    roll  = c;
+    yaw   = fixed_t(a);
+    pitch = fixed_t(b);
+    roll  = fixed_t(c);
     xcos  = cos(yaw);
     xsin  = sin(yaw);
     ycos  = cos(pitch);
@@ -34,7 +34,7 @@ void Camera::setAngles(double a, double b, double c) {
 }
 
 void Camera::setYaw(double a) {
-    yaw  = a;
+    yaw  = fixed_t(a);
     xcos = cos(yaw);
     xsin = sin(yaw);
 
@@ -52,7 +52,7 @@ void Camera::setYaw(double a) {
 }
 
 void Camera::setPitch(double b) {
-    pitch = b;
+    pitch = fixed_t(b);
     ycos  = cos(pitch);
     ysin  = sin(pitch);
 
@@ -66,7 +66,7 @@ void Camera::setPitch(double b) {
 }
 
 void Camera::setRoll(double c) {
-    roll = c;
+    roll = fixed_t(c);
     zcos = cos(roll);
     zsin = sin(roll);
 

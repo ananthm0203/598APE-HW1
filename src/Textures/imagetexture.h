@@ -7,8 +7,9 @@ class ImageTexture : public Texture {
 public:
     unsigned int   w, h;
     unsigned char* imageData;
-    void getColor(unsigned char* toFill, double* am, double* op, double* ref, double x, double y);
-    void getColor(unsigned char* toFill, double* am, double* op, double* ref, unsigned int x,
+    void getColor(unsigned char* toFill, fixed_t* am, fixed_t* op, fixed_t* ref, fixed_t x,
+                  fixed_t y);
+    void getColor(unsigned char* toFill, fixed_t* am, fixed_t* op, fixed_t* ref, unsigned int x,
                   unsigned int y);
     ImageTexture(unsigned char* data, unsigned int ww, unsigned int hh);
     ImageTexture(unsigned int ww, unsigned int hh);

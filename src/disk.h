@@ -1,15 +1,15 @@
 #ifndef __DISK_H__
 #define __DISK_H__
 #include "plane.h"
+#include "vector.h"
 
 class Disk : public Plane {
 public:
     Disk(const Vector& c, Texture* t, double ya, double pi, double ro, double tx, double ty);
-    double       getIntersection(Ray ray, Shape** hitShape) override;
-    bool         getLightIntersection(Ray ray, double* fill) override;
+    fixed_t       getIntersection(Ray ray, Shape** hitShape) override;
+    bool         getLightIntersection(Ray ray, fixed_t* fill) override;
     virtual AABB getBounds() const override {
-        Vector radius_vec(textureX, textureY,
-                          0.01); // Small thickness in normal direction
+        Vector radius_vec(textureX, textureY, fixed_t(0.01)); // Small thickness in normal direction
         Vector rotated_min = center;
         Vector rotated_max = center;
 

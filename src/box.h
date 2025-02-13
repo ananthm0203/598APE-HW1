@@ -6,11 +6,10 @@ class Box : public Plane {
 public:
     Box(const Vector& c, Texture* t, double ya, double pi, double ro, double tx, double ty);
     Box(const Vector& c, Texture* t, double ya, double pi, double ro, double tx);
-    double       getIntersection(Ray ray, Shape** hitShape) override;
-    bool         getLightIntersection(Ray ray, double* fill) override;
+    fixed_t       getIntersection(Ray ray, Shape** hitShape) override;
+    bool         getLightIntersection(Ray ray, fixed_t* fill) override;
     virtual AABB getBounds() const override {
-        Vector half_size(textureX / 2, textureY / 2,
-                         0.01); // Small thickness in Z direction
+        Vector half_size(textureX / 2, textureY / 2, fixed_t(0.01)); // Small thickness in Z direction
         Vector rotated_min = center;
         Vector rotated_max = center;
 

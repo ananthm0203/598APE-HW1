@@ -51,20 +51,20 @@ std::unique_ptr<BVHNode> BVH::buildBVH(std::vector<std::unique_ptr<Shape>>& shap
     return node;
 }
 
-double BVH::getIntersection(const Ray& ray, Shape** hitShape) const {
+fixed_t BVH::getIntersection(const Ray& ray, Shape** hitShape) const {
     if (!root)
-        return inf;
+        return fixed_t(inf);
     return getNodeIntersection(root.get(), ray, hitShape);
 }
 
-double BVH::getNodeIntersection(const BVHNode* node, const Ray& ray, Shape** hitShape) const {
+fixed_t BVH::getNodeIntersection(const BVHNode* node, const Ray& ray, Shape** hitShape) const {
     if (!node->bounds.intersect(ray)) {
-        return inf;
+        return fixed_t(inf);
     }
 
     if (node->shape) {
-        double t = node->shape->getIntersection(ray, hitShape);
-        if (t != inf) {
+        fixed_t t = node->shape->getIntersection(ray, hitShape);
+        if (t != fixed_t(inf)) {
             *hitShape = node->shape;
         }
         return t;
@@ -73,8 +73,8 @@ double BVH::getNodeIntersection(const BVHNode* node, const Ray& ray, Shape** hit
     Shape* leftHitShape  = nullptr;
     Shape* rightHitShape = nullptr;
 
-    double hitLeft  = getNodeIntersection(node->left.get(), ray, &leftHitShape);
-    double hitRight = getNodeIntersection(node->right.get(), ray, &rightHitShape);
+    fixed_t hitLeft  = getNodeIntersection(node->left.get(), ray, &leftHitShape);
+    fixed_t hitRight = getNodeIntersection(node->right.get(), ray, &rightHitShape);
 
     if (hitLeft < hitRight) {
         *hitShape = leftHitShape;
@@ -85,13 +85,13 @@ double BVH::getNodeIntersection(const BVHNode* node, const Ray& ray, Shape** hit
     }
 }
 
-bool BVH::getLightIntersection(const Ray& ray, double* fill) const {
+bool BVH::getLightIntersection(const Ray& ray, fixed_t* fill) const {
     if (!root)
         return false;
     return getNodeLightIntersection(root.get(), ray, fill);
 }
 
-bool BVH::getNodeLightIntersection(const BVHNode* node, const Ray& ray, double* fill) const {
+bool BVH::getNodeLightIntersection(const BVHNode* node, const Ray& ray, fixed_t* fill) const {
     if (!node->bounds.intersect(ray)) {
         return false;
     }

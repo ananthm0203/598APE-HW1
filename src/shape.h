@@ -1,31 +1,34 @@
 #ifndef __SHAPE_H__
 #define __SHAPE_H__
 #include "aabb.h"
+#include "fpm/fixed.h"
+#include "fpm/math.h"
 #include "light.h"
+#include "vector.h"
 #include <algorithm>
 
 class Shape {
 public:
     Shape(const Vector& c, Texture* t, double ya, double pi, double ro);
     virtual ~Shape() = default;
-    double   yaw, pitch, roll, xsin, xcos, ysin, ycos, zsin, zcos;
+    fixed_t  yaw, pitch, roll, xsin, xcos, ysin, ycos, zsin, zcos;
     Vector   center;
     Texture* texture;
-    double   textureX, textureY, mapX, mapY, mapOffX, mapOffY;
+    fixed_t  textureX, textureY, mapX, mapY, mapOffX, mapOffY;
     Texture* normalMap;
 
-    virtual double        getIntersection(Ray ray, Shape** hitShape)  = 0;
-    virtual bool          getLightIntersection(Ray ray, double* fill) = 0;
-    virtual void          move()                                      = 0;
-    virtual unsigned char reversible()                                = 0;
-    virtual void   getColor(unsigned char* toFill, double* am, double* op, double* ref, Ray ray,
-                            unsigned int depth)                       = 0;
-    virtual Vector getNormal(Vector point)                            = 0;
-    virtual void   setAngles(double yaw, double pitch, double roll)   = 0;
-    virtual void   setYaw(double d)                                   = 0;
-    virtual void   setPitch(double d)                                 = 0;
-    virtual void   setRoll(double d)                                  = 0;
-    virtual AABB   getBounds() const                                  = 0;
+    virtual fixed_t       getIntersection(Ray ray, Shape** hitShape)   = 0;
+    virtual bool          getLightIntersection(Ray ray, fixed_t* fill) = 0;
+    virtual void          move()                                       = 0;
+    virtual unsigned char reversible()                                 = 0;
+    virtual void   getColor(unsigned char* toFill, fixed_t* am, fixed_t* op, fixed_t* ref, Ray ray,
+                            unsigned int depth)                        = 0;
+    virtual Vector getNormal(Vector point)                             = 0;
+    virtual void   setAngles(fixed_t yaw, fixed_t pitch, fixed_t roll) = 0;
+    virtual void   setYaw(fixed_t d)                                   = 0;
+    virtual void   setPitch(fixed_t d)                                 = 0;
+    virtual void   setRoll(fixed_t d)                                  = 0;
+    virtual AABB   getBounds() const                                   = 0;
 };
 
 #endif
