@@ -7,6 +7,7 @@ Autonoma::Autonoma(const Camera& c, Texture* tex) : camera(c), depth(10), skybox
 }
 
 void Autonoma::addShape(std::unique_ptr<Shape>&& r) {
+    shape_perm.push_back(shapes.size());
     shapes.push_back(std::move(r));
 }
 

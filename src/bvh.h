@@ -6,31 +6,33 @@
 #include "shape.h"
 #include <memory>
 #include <vector>
+#include <random>
 
-class BVHNode {
+class alignas(64) BVHNode {
 public:
     AABB                     bounds;
-    std::unique_ptr<BVHNode> left;
-    std::unique_ptr<BVHNode> right;
+    unsigned leftChild;
     Shape*                   shape;
 
-    BVHNode() : bounds(), left(nullptr), right(nullptr), shape(nullptr) {}
-    ~BVHNode() {}
-    bool isLeaf() const { return shape != nullptr; }
+    BVHNode() : bounds(), leftChild(0), shape(nullptr) {}
+    ~BVHNode() = default;
 };
 
 class BVH {
 public:
-    BVH(std::vector<std::unique_ptr<Shape>>& shapes);
+    BVH(std::vector<std::unique_ptr<Shape>>& shapes, std::vector<unsigned>& shape_perm);
+    ~BVH();
     double getIntersection(const Ray& ray, Shape** hitShape) const;
     bool   getLightIntersection(const Ray& ray, double* fill) const;
 
 private:
-    std::unique_ptr<BVHNode> root;
-    std::unique_ptr<BVHNode> buildBVH(std::vector<std::unique_ptr<Shape>>& shapes, int start,
-                                      int end);
-    double getNodeIntersection(const BVHNode* node, const Ray& ray, Shape** hitShape) const;
-    bool   getNodeLightIntersection(const BVHNode* node, const Ray& ray, double* fill) const;
+    std::mt19937 gen;
+    BVHNode *nodes;
+    size_t nodes_used;
+    void buildBVH(std::vector<std::unique_ptr<Shape>>& shapes, std::vector<unsigned>& shape_perm, int start,
+                                      int end, int node_idx);
+    double getNodeIntersection(size_t node_idx, const Ray& ray, Shape** hitShape) const;
+    bool   getNodeLightIntersection(size_t node_idx, const Ray& ray, double* fill) const;
 };
 
 #endif

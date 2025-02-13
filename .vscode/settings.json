@@ -1,9 +1,6 @@
 {
     "files.associations": {
         "*.flex": "lex",
-        "deque": "cpp",
-        "string": "cpp",
-        "vector": "cpp",
         "cctype": "cpp",
         "clocale": "cpp",
         "cmath": "cpp",
@@ -17,8 +14,10 @@
         "atomic": "cpp",
         "*.tcc": "cpp",
         "cstdint": "cpp",
+        "deque": "cpp",
         "list": "cpp",
         "unordered_map": "cpp",
+        "vector": "cpp",
         "exception": "cpp",
         "algorithm": "cpp",
         "functional": "cpp",
@@ -29,6 +28,7 @@
         "numeric": "cpp",
         "optional": "cpp",
         "random": "cpp",
+        "string": "cpp",
         "string_view": "cpp",
         "system_error": "cpp",
         "tuple": "cpp",

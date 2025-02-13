@@ -17,6 +17,7 @@ struct Autonoma {
     Texture*                            skybox;
     unsigned int                        depth;
     std::vector<std::unique_ptr<Shape>> shapes;
+    std::vector<unsigned> shape_perm; 
     std::vector<std::unique_ptr<Light>> lights;
     std::unique_ptr<BVH>                bvh;
 

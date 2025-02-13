@@ -442,7 +442,7 @@ Autonoma* createInputs(const char* inputFile) {
         }
     }
 
-    MAIN_DATA->bvh = std::make_unique<BVH>(MAIN_DATA->shapes);
+    MAIN_DATA->bvh = std::make_unique<BVH>(MAIN_DATA->shapes, MAIN_DATA->shape_perm);
 
     return MAIN_DATA;
 }
@@ -508,7 +508,7 @@ void setFrame(const char* animateFile, Autonoma* MAIN_DATA, int frame, int frame
                     exit(1);
                 }
             } else if (streq(object_type, "object")) {
-                auto& shape = MAIN_DATA->shapes[obj_num];
+                auto& shape = MAIN_DATA->shapes[MAIN_DATA->shape_perm[obj_num]];
 
                 if (streq(field_type, "yaw")) {
                     shape->setYaw(result);
