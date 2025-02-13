@@ -3,7 +3,7 @@ Disk::Disk(const Vector& c, Texture* t, double ya, double pi, double ro, double 
     : Plane(c, t, ya, pi, ro, tx, ty) {
 }
 
-double Disk::getIntersection(Ray ray, Shape** hitShape) {
+double Disk::getIntersection(const Ray& ray, const Shape** hitShape) const {
     double time = Plane::getIntersection(ray, hitShape);
     if (time == inf)
         return time;
@@ -14,7 +14,7 @@ double Disk::getIntersection(Ray ray, Shape** hitShape) {
     return time;
 }
 
-bool Disk::getLightIntersection(Ray ray, double* fill) {
+bool Disk::getLightIntersection(const Ray& ray, double* fill) const {
     const double t    = ray.vector.dot(vect);
     const double norm = vect.dot(ray.point) + d;
     const double r    = -norm / t;

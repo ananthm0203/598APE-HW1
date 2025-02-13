@@ -1,7 +1,8 @@
 FUNC := g++
 copt := -c 
 OBJ_DIR := ./bin/
-FLAGS := -O3 -lm -g -Werror -lstdc++
+OUTPUT_DIR := ./output/
+FLAGS := -O3 -lm -g -Werror -lstdc++ -flto
 
 CPP_FILES := $(wildcard src/*.cpp)
 OBJ_FILES := $(addprefix $(OBJ_DIR),$(notdir $(CPP_FILES:.cpp=.obj)))
@@ -17,3 +18,6 @@ clean:
 	cd ./src && make clean
 	rm -f ./*.exe
 	rm -f ./*.obj
+
+clean_outputs:
+	rm -f $(OUTPUT_DIR)*.ppm

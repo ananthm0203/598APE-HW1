@@ -14,18 +14,18 @@ public:
     double   textureX, textureY, mapX, mapY, mapOffX, mapOffY;
     Texture* normalMap;
 
-    virtual double        getIntersection(Ray ray, Shape** hitShape)  = 0;
-    virtual bool          getLightIntersection(Ray ray, double* fill) = 0;
-    virtual void          move()                                      = 0;
-    virtual unsigned char reversible()                                = 0;
-    virtual void   getColor(unsigned char* toFill, double* am, double* op, double* ref, Ray ray,
-                            unsigned int depth)                       = 0;
-    virtual Vector getNormal(Vector point)                            = 0;
-    virtual void   setAngles(double yaw, double pitch, double roll)   = 0;
-    virtual void   setYaw(double d)                                   = 0;
-    virtual void   setPitch(double d)                                 = 0;
-    virtual void   setRoll(double d)                                  = 0;
-    virtual AABB   getBounds() const                                  = 0;
+    virtual double        getIntersection(const Ray& ray, const Shape** hitShape) const = 0;
+    virtual bool          getLightIntersection(const Ray& ray, double* fill) const      = 0;
+    virtual void          move()                                                        = 0;
+    virtual unsigned char reversible() const                                            = 0;
+    virtual void          getColor(unsigned char* toFill, double* am, double* op, double* ref,
+                                   const Ray& ray, unsigned int depth) const            = 0;
+    virtual Vector        getNormal(const Vector& point) const                          = 0;
+    virtual void          setAngles(double yaw, double pitch, double roll)              = 0;
+    virtual void          setYaw(double d)                                              = 0;
+    virtual void          setPitch(double d)                                            = 0;
+    virtual void          setRoll(double d)                                             = 0;
+    virtual AABB          getBounds() const                                             = 0;
 };
 
 #endif

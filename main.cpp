@@ -23,22 +23,21 @@
 
 using namespace std;
 
+struct TriangleParsed {
+    int a;
+    int b;
+    int c;
+};
+
 float tdiff(struct timeval* start, struct timeval* end) {
     return (end->tv_sec - start->tv_sec) + 1e-6 * (end->tv_usec - start->tv_usec);
-}
-
-unsigned char* getColor(unsigned char a, unsigned char b, unsigned char c) {
-    unsigned char* r = (unsigned char*)malloc(sizeof(unsigned char) * 3);
-    r[0]             = a;
-    r[1]             = b;
-    r[2]             = c;
-    return r;
 }
 
 int W = 1000, H = 1000;
 
 unsigned char* DATA = (unsigned char*)malloc(W * H * 3 * sizeof(unsigned char));
-unsigned char  get(int i, int j, int k) {
+
+unsigned char get(int i, int j, int k) {
     return DATA[3 * (i + j * W) + k];
 }
 unsigned char* getPos(int i, int j) {
@@ -50,16 +49,17 @@ void set(int i, int j, unsigned char r, unsigned char g, unsigned char b) {
     DATA[3 * (i + j * W) + 2] = b;
 }
 
-void getLight(double* tColor, Autonoma* aut, Vector point, Vector norm, unsigned char flip) {
+void getLight(double* tColor, const Autonoma& aut, const Vector& point, const Vector& norm,
+              unsigned char flip) {
     tColor[0] = tColor[1] = tColor[2] = 0.;
-    for (const auto& light : aut->lights) {
+    for (const auto& light : aut.lights) {
         double lightColor[3];
         lightColor[0] = light->color[0] / 255.;
         lightColor[1] = light->color[1] / 255.;
         lightColor[2] = light->color[2] / 255.;
         Vector ra     = light->center - point;
 
-        bool   hit  = aut->bvh->getLightIntersection(Ray(point + ra * .01, ra), lightColor);
+        bool   hit  = aut.bvh->getLightIntersection(Ray(point + ra * .01, ra), lightColor);
         double perc = (norm.dot(ra) / (ra.mag() * norm.mag()));
         if (!hit) {
             if (flip && perc < 0)
@@ -79,9 +79,12 @@ void getLight(double* tColor, Autonoma* aut, Vector point, Vector norm, unsigned
     }
 }
 
-void calcColor(unsigned char* toFill, Autonoma* c, Ray ray, unsigned int depth) {
-    Shape* hitShape = nullptr;
-    double time     = c->bvh->getIntersection(ray, &hitShape);
+void calcColor(unsigned char* toFill, const Autonoma& c, const Ray& ray, unsigned int depth) {
+    if (depth >= c.depth) {
+        return;
+    }
+    const Shape* hitShape = nullptr;
+    double       time     = c.bvh->getIntersection(ray, &hitShape);
 
     if (!hitShape || time == inf) {
         double       opacity, reflection, ambient;
@@ -90,8 +93,7 @@ void calcColor(unsigned char* toFill, Autonoma* c, Ray ray, unsigned int depth) 
         const double z     = temp.z;
         const double me    = (temp.y < 0) ? -temp.y : temp.y;
         const double angle = atan2(z, x);
-        c->skybox->getColor(toFill, &ambient, &opacity, &reflection, fix(angle / M_TWO_PI),
-                            fix(me));
+        c.skybox->getColor(toFill, &ambient, &opacity, &reflection, fix(angle / M_TWO_PI), fix(me));
         return;
     }
 
@@ -104,8 +106,8 @@ void calcColor(unsigned char* toFill, Autonoma* c, Ray ray, unsigned int depth) 
     toFill[0] = (unsigned char)(toFill[0] * (ambient + lightData[0] * (1 - ambient)));
     toFill[1] = (unsigned char)(toFill[1] * (ambient + lightData[1] * (1 - ambient)));
     toFill[2] = (unsigned char)(toFill[2] * (ambient + lightData[2] * (1 - ambient)));
-    if (depth < c->depth && (opacity < 1 - 1e-6 || reflection > 1e-6)) {
-        unsigned char col[4];
+    if (opacity < 1 - 1e-6 || reflection > 1e-6) {
+        unsigned char col[4] = {0, 0, 0, 0};
         if (opacity < 1 - 1e-6) {
             Ray nextRay = Ray(intersect + ray.vector * 1E-4, ray.vector);
             calcColor(col, c, nextRay, depth + 1);
@@ -126,7 +128,7 @@ void calcColor(unsigned char* toFill, Autonoma* c, Ray ray, unsigned int depth) 
     }
 }
 
-void        refresh(Autonoma* c) {
+void        refresh(const Autonoma& c) {
 #pragma omp parallel for collapse(2) schedule(dynamic)
     for (int ty = 0; ty < H; ty += TILE_SIZE) {
         for (int tx = 0; tx < W; tx += TILE_SIZE) {
@@ -136,9 +138,10 @@ void        refresh(Autonoma* c) {
                     int y = ty + dy;
                     if (x < W && y < H) { // Bounds check
                         int    n  = y * W + x;
-                        Vector ra = c->camera.forward + ((double)x / W - 0.5) * c->camera.right +
-                                    (0.5 - (double)y / H) * c->camera.up;
-                        calcColor(&DATA[3 * n], c, Ray(c->camera.focus, ra), 0);
+                        Vector ra = c.camera.forward + ((double)x / W - 0.5) * c.camera.right +
+                                    (0.5 - (double)y / H) * c.camera.up;
+                        unsigned char* toFill = DATA + (3 * n);
+                        calcColor(toFill, c, Ray(c.camera.focus, ra), 0);
                     }
                 }
             }
@@ -262,25 +265,22 @@ Texture* parseTexture(FILE* f, bool allowNull) {
     exit(1);
 }
 
-Vector* getVectors(FILE* f, int len) {
-    Vector* vec = (Vector*)malloc(len * sizeof(Vector));
-    float   x, y, z;
+std::vector<Vector> getVectors(FILE* f, int len) {
+    std::vector<Vector> vec(len, Vector(0, 0, 0));
+    float               x, y, z;
     for (int i = 0; i < len; i++) {
         if (fscanf(f, "%f %f %f\n", &x, &y, &z) == EOF) {
             printf("Failed to read vectors\n");
             exit(1);
         }
-        vec[i].x = x;
-        vec[i].y = y;
-        vec[i].z = z;
+        vec[i] = Vector(x, y, z);
     }
     return vec;
 }
-unsigned int* getTriangles(FILE* f, int len) {
-    unsigned int* vec = (unsigned int*)malloc(3 * len * sizeof(unsigned int));
-    int           a, b, d;
-    for (int i = 0; i < 3 * len; i += 3) {
-        if (fscanf(f, "%d %d %d\n", &vec[i], &vec[i + 1], &vec[i + 2]) == EOF) {
+std::vector<TriangleParsed> getTriangles(FILE* f, int len) {
+    std::vector<TriangleParsed> vec(len);
+    for (int i = 0; i < len; i++) {
+        if (fscanf(f, "%d %d %d\n", &vec[i].a, &vec[i].b, &vec[i].c) == EOF) {
             printf("Failed to read triangles\n");
             exit(1);
         }
@@ -288,7 +288,7 @@ unsigned int* getTriangles(FILE* f, int len) {
     return vec;
 }
 
-Autonoma* createInputs(const char* inputFile) {
+Autonoma createInputs(const char* inputFile) {
     double   camera_x   = 0;
     double   camera_y   = 2;
     double   camera_z   = 0;
@@ -316,8 +316,7 @@ Autonoma* createInputs(const char* inputFile) {
         const char* texture_path = "images/skybox.jpg";
         background               = new ImageTexture(texture_path);
     }
-    Autonoma* MAIN_DATA =
-        new Autonoma(Camera(Vector(camera_x, camera_y, camera_z), yaw, pitch, roll), background);
+    Autonoma MAIN_DATA(Camera(Vector(camera_x, camera_y, camera_z), yaw, pitch, roll), background);
 
     std::vector<Shape*> shapes;
     if (f) {
@@ -332,9 +331,9 @@ Autonoma* createInputs(const char* inputFile) {
                            "<color_g> <color_b>\n");
                     exit(1);
                 }
-                auto light = std::make_unique<Light>(Vector(light_x, light_y, light_z),
-                                                     getColor(color_r, color_g, color_b));
-                MAIN_DATA->addLight(std::move(light));
+                auto light = std::make_unique<Light>(Vector(light_x, light_y, light_z), color_r,
+                                                     color_g, color_b);
+                MAIN_DATA.addLight(std::move(light));
             } else if (streq(object_type, "plane")) {
                 double plane_x, plane_y, plane_z;
                 double yaw, pitch, roll;
@@ -349,7 +348,7 @@ Autonoma* createInputs(const char* inputFile) {
                 auto     shape = std::make_unique<Plane>(Vector(plane_x, plane_y, plane_z), texture,
                                                      yaw, pitch, roll, tx, ty);
                 shape->normalMap = parseTexture(f, true);
-                MAIN_DATA->addShape(std::move(shape));
+                MAIN_DATA.addShape(std::move(shape));
             } else if (streq(object_type, "disk")) {
                 double disk_x, disk_y, disk_z;
                 double yaw, pitch, roll;
@@ -364,7 +363,7 @@ Autonoma* createInputs(const char* inputFile) {
                 auto shape = std::make_unique<Disk>(Vector(disk_x, disk_y, disk_z), texture, yaw,
                                                     pitch, roll, tx, ty);
                 shape->normalMap = parseTexture(f, true);
-                MAIN_DATA->addShape(std::move(shape));
+                MAIN_DATA.addShape(std::move(shape));
             } else if (streq(object_type, "box")) {
                 double box_x, box_y, box_z;
                 double yaw, pitch, roll;
@@ -379,7 +378,7 @@ Autonoma* createInputs(const char* inputFile) {
                 auto shape = std::make_unique<Box>(Vector(box_x, box_y, box_z), texture, yaw, pitch,
                                                    roll, tx, ty);
                 shape->normalMap = parseTexture(f, true);
-                MAIN_DATA->addShape(std::move(shape));
+                MAIN_DATA.addShape(std::move(shape));
             } else if (streq(object_type, "triangle")) {
                 double x1, y1, z1;
                 double x2, y2, z2;
@@ -392,7 +391,7 @@ Autonoma* createInputs(const char* inputFile) {
                 Texture* texture = parseTexture(f, false);
                 auto     shape = std::make_unique<Triangle>(Vector(x1, y1, z1), Vector(x2, y2, z2),
                                                         Vector(x3, y3, z3), texture);
-                MAIN_DATA->addShape(std::move(shape));
+                MAIN_DATA.addShape(std::move(shape));
                 shape->normalMap = parseTexture(f, true);
             } else if (streq(object_type, "sphere")) {
                 double sphere_x, sphere_y, sphere_z;
@@ -408,7 +407,7 @@ Autonoma* createInputs(const char* inputFile) {
                 auto shape = std::make_unique<Sphere>(Vector(sphere_x, sphere_y, sphere_z), texture,
                                                       yaw, pitch, roll, radius);
                 shape->normalMap = parseTexture(f, true);
-                MAIN_DATA->addShape(std::move(shape));
+                MAIN_DATA.addShape(std::move(shape));
             } else if (streq(object_type, "mesh")) {
                 char   point_filepath[100];
                 char   poly_filepath[100];
@@ -435,17 +434,17 @@ Autonoma* createInputs(const char* inputFile) {
                     printf("Could not open triangles file %s\n", poly_filepath);
                     exit(1);
                 }
-                Vector* points = getVectors(vectors, num_points);
+                std::vector<Vector> points = getVectors(vectors, num_points);
                 fclose(vectors);
-                unsigned int* polys = getTriangles(triangles, num_polygons);
+                std::vector<TriangleParsed> polys = getTriangles(triangles, num_polygons);
                 fclose(triangles);
                 Vector offset(off_x, off_y, off_z);
                 for (int i = 0; i < num_polygons; i++) {
-                    auto shape = std::make_unique<Triangle>(
-                        points[polys[3 * i]] + offset, points[polys[3 * i + 1]] + offset,
-                        points[polys[3 * i + 2]] + offset, texture);
+                    auto shape       = std::make_unique<Triangle>(points[polys[i].a] + offset,
+                                                            points[polys[i].b] + offset,
+                                                            points[polys[i].c] + offset, texture);
                     shape->normalMap = normalMap;
-                    MAIN_DATA->addShape(std::move(shape));
+                    MAIN_DATA.addShape(std::move(shape));
                 }
             } else {
                 printf("Unknown object type %s\n", object_type);
@@ -454,7 +453,7 @@ Autonoma* createInputs(const char* inputFile) {
         }
     }
 
-    MAIN_DATA->bvh = std::make_unique<BVH>(MAIN_DATA->shapes);
+    MAIN_DATA.bvh = std::make_unique<BVH>(MAIN_DATA.shapes);
 
     return MAIN_DATA;
 }
@@ -472,7 +471,7 @@ double cosfn(double x, double from, double to) {
     return (to - from) * cos(x * 6.28) + from;
 }
 
-void setFrame(const char* animateFile, Autonoma* MAIN_DATA, int frame, int frameLen) {
+void setFrame(const char* animateFile, Autonoma& MAIN_DATA, int frame, int frameLen) {
     if (animateFile) {
         char   object_type[80];
         char   transition_type[80];
@@ -502,17 +501,17 @@ void setFrame(const char* animateFile, Autonoma* MAIN_DATA, int frame, int frame
 
             if (streq(object_type, "camera")) {
                 if (streq(field_type, "yaw")) {
-                    MAIN_DATA->camera.setYaw(result);
+                    MAIN_DATA.camera.setYaw(result);
                 } else if (streq(field_type, "pitch")) {
-                    MAIN_DATA->camera.setPitch(result);
+                    MAIN_DATA.camera.setPitch(result);
                 } else if (streq(field_type, "roll")) {
-                    MAIN_DATA->camera.setRoll(result);
+                    MAIN_DATA.camera.setRoll(result);
                 } else if (streq(field_type, "x")) {
-                    MAIN_DATA->camera.focus.x = result;
+                    MAIN_DATA.camera.focus.x = result;
                 } else if (streq(field_type, "y")) {
-                    MAIN_DATA->camera.focus.y = result;
+                    MAIN_DATA.camera.focus.y = result;
                 } else if (streq(field_type, "z")) {
-                    MAIN_DATA->camera.focus.z = result;
+                    MAIN_DATA.camera.focus.z = result;
                 } else {
                     printf("Unknown camera field_type %s, expected one of yaw, pitch, "
                            "roll, x, y, z\n",
@@ -520,7 +519,7 @@ void setFrame(const char* animateFile, Autonoma* MAIN_DATA, int frame, int frame
                     exit(1);
                 }
             } else if (streq(object_type, "object")) {
-                auto& shape = MAIN_DATA->shapes[obj_num];
+                auto& shape = MAIN_DATA.shapes[obj_num];
 
                 if (streq(field_type, "yaw")) {
                     shape->setYaw(result);
@@ -651,7 +650,7 @@ int main(int argc, const char** argv) {
         }
     }
 
-    Autonoma* MAIN_DATA = createInputs(inFile);
+    Autonoma MAIN_DATA = createInputs(inFile);
 
     int  frame;
     char command[200];

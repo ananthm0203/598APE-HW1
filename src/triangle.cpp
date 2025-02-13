@@ -47,7 +47,7 @@ Triangle::Triangle(Vector c, Vector b, Vector a, Texture* t)
     d = -vect.dot(center);
 }
 
-double Triangle::getIntersection(Ray ray, Shape** hitShape) {
+double Triangle::getIntersection(const Ray& ray, const Shape** hitShape) const {
     double time = Plane::getIntersection(ray, hitShape);
     if (time == inf)
         return time;
@@ -60,7 +60,7 @@ double Triangle::getIntersection(Ray ray, Shape** hitShape) {
     return time;
 }
 
-bool Triangle::getLightIntersection(Ray ray, double* fill) {
+bool Triangle::getLightIntersection(const Ray& ray, double* fill) const {
     const double t    = ray.vector.dot(vect);
     const double norm = vect.dot(ray.point) + d;
     const double r    = -norm / t;

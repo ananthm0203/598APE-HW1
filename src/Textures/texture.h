@@ -18,13 +18,23 @@ public:
     Texture*     clone();
 };
 
-double interpolate(double a, double b, double x);
+inline double interpolate(double a, double b, double x) {
+    double f = (1.0 - cos(x * M_PI)) * 0.5;
+    return a * (1.0 - f) + b * f;
+}
 
 const char* findExtension(const char* s);
 
-double ground(double e);
+inline double ground(double e) {
+    return (e > 1.) ? 1. : e;
+}
 
-double fix(double a);
+inline double fix(double a) {
+    a = fmod(a, 1.);
+    if (a < 0)
+        a += 1.;
+    return a;
+}
 
 char lowerCase(char c);
 

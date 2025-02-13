@@ -22,14 +22,14 @@ public:
 class BVH {
 public:
     BVH(std::vector<std::unique_ptr<Shape>>& shapes);
-    double getIntersection(const Ray& ray, Shape** hitShape) const;
+    double getIntersection(const Ray& ray, const Shape** hitShape) const;
     bool   getLightIntersection(const Ray& ray, double* fill) const;
 
 private:
     std::unique_ptr<BVHNode> root;
     std::unique_ptr<BVHNode> buildBVH(std::vector<std::unique_ptr<Shape>>& shapes, int start,
                                       int end);
-    double getNodeIntersection(const BVHNode* node, const Ray& ray, Shape** hitShape) const;
+    double getNodeIntersection(const BVHNode* node, const Ray& ray, const Shape** hitShape) const;
     bool   getNodeLightIntersection(const BVHNode* node, const Ray& ray, double* fill) const;
 };
 

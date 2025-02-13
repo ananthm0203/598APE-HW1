@@ -4,12 +4,11 @@
 #include "Textures/texture.h"
 #include "camera.h"
 #include "vector.h"
-
+#include <array>
 struct Light {
-    unsigned char* color;
-    unsigned char* getColor(unsigned char a, unsigned char b, unsigned char c);
-    Vector         center;
-    Light(const Vector& cente, unsigned char* colo);
+    std::array<unsigned char, 3> color;
+    Vector                       center;
+    Light(const Vector& cente, unsigned char a, unsigned char b, unsigned char c);
 };
 
 #endif

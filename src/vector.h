@@ -6,36 +6,80 @@
 #include <limits>
 #include <stdio.h>
 #include <stdlib.h>
-#define inf std::numeric_limits<double>::infinity()
+
+#define inf std::numeric_limits<double>::infinity() 
 
 class Vector {
 public:
     double x, y, z;
-    Vector(double a, double b, double c);
+    Vector(double a, double b, double c) : x(a), y(b), z(c) {}
+    inline void operator-=(const Vector& rhs) {
+        x -= rhs.x;
+        y -= rhs.y;
+        z -= rhs.z;
+    }
+    inline void operator+=(const Vector& rhs) {
+        x += rhs.x;
+        y += rhs.y;
+        z += rhs.z;
+    }
+    inline void operator*=(const double rhs) {
+        x *= rhs;
+        y *= rhs;
+        z *= rhs;
+    }
+    inline void operator*=(const float rhs) {
+        x *= rhs;
+        y *= rhs;
+        z *= rhs;
+    }
+    inline void operator*=(const int rhs) {
+        x *= rhs;
+        y *= rhs;
+        z *= rhs;
+    }
+    inline void operator/=(const double rhs) {
+        x /= rhs;
+        y /= rhs;
+        z /= rhs;
+    }
+    inline void operator/=(const float rhs) {
+        x /= rhs;
+        y /= rhs;
+        z /= rhs;
+    }
+    inline void operator/=(const int rhs) {
+        x /= rhs;
+        y /= rhs;
+        z /= rhs;
+    }
 
-    void operator+=(const Vector);
-    void operator-=(const Vector);
-    void operator*=(const double);
-    void operator*=(const float);
-    void operator*=(const int);
-    void operator/=(const double);
-    void operator/=(const float);
-    void operator/=(const int);
-
-    Vector operator+(const Vector) const;
-    Vector operator-(const Vector) const;
-    /*  Vector operator * (const Vector);*/
-    Vector operator*(const double) const;
-    Vector operator*(const float) const;
-    Vector operator*(const int) const;
-    Vector operator/(const double) const;
-    Vector operator/(const float) const;
-    Vector operator/(const int) const;
-    Vector cross(const Vector a) const;
-    double mag2() const;
-    double mag() const;
-    double dot(const Vector a) const;
-    Vector normalize() const;
+    inline Vector operator-(const Vector& rhs) const {
+        return Vector(x - rhs.x, y - rhs.y, z - rhs.z);
+    }
+    inline Vector operator+(const Vector& rhs) const {
+        return Vector(x + rhs.x, y + rhs.y, z + rhs.z);
+    }
+    /*
+    Vector Vector::operator * (const Vector a) {
+       return Vector(y*a.z-z*a.y, z*a.x-x*a.z, x*a.y-y*a.x);
+    }*/
+    inline Vector operator*(const double rhs) const { return Vector(x * rhs, y * rhs, z * rhs); }
+    inline Vector operator*(const float rhs) const { return Vector(x * rhs, y * rhs, z * rhs); }
+    inline Vector operator*(const int rhs) const { return Vector(x * rhs, y * rhs, z * rhs); }
+    inline Vector operator/(const double rhs) const { return Vector(x / rhs, y / rhs, z / rhs); }
+    inline Vector operator/(const float rhs) const { return Vector(x / rhs, y / rhs, z / rhs); }
+    inline Vector operator/(const int rhs) const { return Vector(x / rhs, y / rhs, z / rhs); }
+    inline Vector cross(const Vector& a) const {
+        return Vector(y * a.z - z * a.y, z * a.x - x * a.z, x * a.y - y * a.x);
+    }
+    inline double mag2() const { return x * x + y * y + z * z; }
+    inline double mag() const { return sqrt(x * x + y * y + z * z); }
+    inline double dot(const Vector& a) const { return x * a.x + y * a.y + z * a.z; }
+    inline Vector normalize() const {
+        double m = mag();
+        return Vector(x / m, y / m, z / m);
+    }
 
     double operator[](int i) const {
         switch (i) {
@@ -51,45 +95,55 @@ public:
     }
 };
 
-class Ray {
-public:
-    Vector point, vector, inv_vector;
-    Ray(const Vector& po, const Vector& ve);
-};
-
-inline Vector operator-(const Vector b) {
+inline Vector operator-(const Vector& b) {
     return Vector(-b.x, -b.y, -b.z);
 }
 
-inline Vector operator+(const Vector b) {
+inline Vector operator+(const Vector& b) {
     return b;
 }
 
-inline Vector operator*(const int a, const Vector b) {
+inline Vector operator*(const int a, const Vector& b) {
     return Vector(a * b.x, a * b.y, a * b.z);
 }
 
-inline Vector operator*(const double a, const Vector b) {
+inline Vector operator*(const double a, const Vector& b) {
     return Vector(a * b.x, a * b.y, a * b.z);
 }
 
-inline Vector operator*(const float a, const Vector b) {
+inline Vector operator*(const float a, const Vector& b) {
     return Vector(a * b.x, a * b.y, a * b.z);
 }
 
-inline Vector operator/(const int a, const Vector b) {
+inline Vector operator/(const int a, const Vector& b) {
     return Vector(a / b.x, a / b.y, a / b.z);
 }
 
-inline Vector operator/(const double a, const Vector b) {
+inline Vector operator/(const double a, const Vector& b) {
     return Vector(a / b.x, a / b.y, a / b.z);
 }
 
-inline Vector operator/(const float a, const Vector b) {
+inline Vector operator/(const float a, const Vector& b) {
     return Vector(a / b.x, a / b.y, a / b.z);
 }
 
-Vector solveScalers(Vector v1, Vector v2, Vector v3, Vector solve);
+inline Vector solveScalers(const Vector& v1, const Vector& v2, const Vector& v3, const Vector& C) {
+    double denom = v1.z * v2.y * v3.x - v1.y * v2.z * v3.x - v1.z * v2.x * v3.y +
+                   v1.x * v2.z * v3.y + v1.y * v2.x * v3.z - v1.x * v2.y * v3.z;
+    double a = C.z * v2.y * v3.x - C.y * v2.z * v3.x - C.z * v2.x * v3.y + C.x * v2.z * v3.y +
+               C.y * v2.x * v3.z - C.x * v2.y * v3.z;
+    double b = -C.z * v1.y * v3.x + C.y * v1.z * v3.x + C.z * v1.x * v3.y - C.x * v1.z * v3.y -
+               C.y * v1.x * v3.z + C.x * v1.y * v3.z;
+    double c = C.z * v1.y * v2.x - C.y * v1.z * v2.x - C.z * v1.x * v2.y + C.x * v1.z * v2.y +
+               C.y * v1.x * v2.z - C.x * v1.y * v2.z;
+    return Vector(a / denom, b / denom, c / denom);
+}
+
+class Ray {
+public:
+    Vector point, vector, inv_vector;
+    Ray(const Vector& po, const Vector& ve) : point(po), vector(ve), inv_vector(1 / ve) {}
+};
 
 int print_vector(FILE* stream, const struct printf_info* info, const void* const* args);
 

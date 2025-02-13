@@ -51,13 +51,13 @@ std::unique_ptr<BVHNode> BVH::buildBVH(std::vector<std::unique_ptr<Shape>>& shap
     return node;
 }
 
-double BVH::getIntersection(const Ray& ray, Shape** hitShape) const {
+double BVH::getIntersection(const Ray& ray, const Shape** hitShape) const {
     if (!root)
         return inf;
     return getNodeIntersection(root.get(), ray, hitShape);
 }
 
-double BVH::getNodeIntersection(const BVHNode* node, const Ray& ray, Shape** hitShape) const {
+double BVH::getNodeIntersection(const BVHNode* node, const Ray& ray, const Shape** hitShape) const {
     if (!node->bounds.intersect(ray)) {
         return inf;
     }
@@ -70,8 +70,8 @@ double BVH::getNodeIntersection(const BVHNode* node, const Ray& ray, Shape** hit
         return t;
     }
 
-    Shape* leftHitShape  = nullptr;
-    Shape* rightHitShape = nullptr;
+    const Shape* leftHitShape  = nullptr;
+    const Shape* rightHitShape = nullptr;
 
     double hitLeft  = getNodeIntersection(node->left.get(), ray, &leftHitShape);
     double hitRight = getNodeIntersection(node->right.get(), ray, &rightHitShape);
@@ -103,8 +103,7 @@ bool BVH::getNodeLightIntersection(const BVHNode* node, const Ray& ray, double* 
     Shape* leftHitShape  = nullptr;
     Shape* rightHitShape = nullptr;
 
-    bool hitLeft  = getNodeLightIntersection(node->left.get(), ray, fill);
-    bool hitRight = getNodeLightIntersection(node->right.get(), ray, fill);
-
-    return hitLeft || hitRight;
+    // short circuiting
+    return getNodeLightIntersection(node->left.get(), ray, fill) ||
+           getNodeLightIntersection(node->right.get(), ray, fill);
 }

@@ -78,10 +78,11 @@ void Plane::setRoll(double c) {
     d = -vect.dot(center);
 }
 
-double Plane::getIntersection(Ray ray, Shape** hitShape) {
+double Plane::getIntersection(const Ray& ray, const Shape** hitShape) const {
     const double t    = ray.vector.dot(vect);
     const double norm = vect.dot(ray.point) + d;
     const double r    = -norm / t;
+
     if (r > 0) {
         *hitShape = this;
         return r;
@@ -89,7 +90,7 @@ double Plane::getIntersection(Ray ray, Shape** hitShape) {
     return inf;
 }
 
-bool Plane::getLightIntersection(Ray ray, double* fill) {
+bool Plane::getLightIntersection(const Ray& ray, double* fill) const {
     const double t    = ray.vector.dot(vect);
     const double norm = vect.dot(ray.point) + d;
     const double r    = -norm / t;
@@ -114,17 +115,17 @@ bool Plane::getLightIntersection(Ray ray, double* fill) {
 void Plane::move() {
     d = -vect.dot(center);
 }
-void Plane::getColor(unsigned char* toFill, double* am, double* op, double* ref, Ray ray,
-                     unsigned int depth) {
+void Plane::getColor(unsigned char* toFill, double* am, double* op, double* ref, const Ray& ray,
+                     unsigned int depth) const {
     Vector dist = solveScalers(right, up, vect, ray.point - center);
     texture->getColor(toFill, am, op, ref, fix(dist.x / textureX - .5),
                       fix(dist.y / textureY - .5));
 }
-unsigned char Plane::reversible() {
+unsigned char Plane::reversible() const {
     return 1;
 }
 
-Vector Plane::getNormal(Vector point) {
+Vector Plane::getNormal(const Vector& point) const {
     if (normalMap == NULL)
         return vect;
     else {
