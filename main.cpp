@@ -19,6 +19,8 @@
 #include <sys/time.h>
 #include <vector>
 
+#define TILE_SIZE (4)
+
 using namespace std;
 
 float tdiff(struct timeval* start, struct timeval* end) {
@@ -124,20 +126,17 @@ void calcColor(unsigned char* toFill, Autonoma* c, Ray ray, unsigned int depth) 
     }
 }
 
-#define TILE_SIZE (4)
-
-void refresh(Autonoma* c) {
-    #pragma omp parallel for collapse(2) schedule(dynamic)
+void        refresh(Autonoma* c) {
+#pragma omp parallel for collapse(2) schedule(dynamic)
     for (int ty = 0; ty < H; ty += TILE_SIZE) {
         for (int tx = 0; tx < W; tx += TILE_SIZE) {
             for (int dy = 0; dy < TILE_SIZE; ++dy) {
                 for (int dx = 0; dx < TILE_SIZE; ++dx) {
                     int x = tx + dx;
                     int y = ty + dy;
-                    if (x < W && y < H) {  // Bounds check
-                        int n = y * W + x;
-                        Vector ra = c->camera.forward +
-                                    ((double)x / W - 0.5) * c->camera.right +
+                    if (x < W && y < H) { // Bounds check
+                        int    n  = y * W + x;
+                        Vector ra = c->camera.forward + ((double)x / W - 0.5) * c->camera.right +
                                     (0.5 - (double)y / H) * c->camera.up;
                         calcColor(&DATA[3 * n], c, Ray(c->camera.focus, ra), 0);
                     }
