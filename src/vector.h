@@ -53,7 +53,7 @@ public:
 
 class Ray {
 public:
-    Vector point, vector;
+    Vector point, vector, inv_vector;
     Ray(const Vector& po, const Vector& ve);
 };
 
