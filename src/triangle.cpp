@@ -52,11 +52,10 @@ double Triangle::getIntersection(const Ray& ray, const Shape** hitShape) const {
     if (time == inf)
         return time;
     auto [dist, denom] = solveScalers(right, up, vect, ray.point + ray.vector * time - center);
-    dist.x /= denom;
-    dist.y /= denom;
+    // Remove divisions by opting for sign comps and switches
     unsigned char tmp =
-        (thirdX - dist.x) * textureY + (thirdX - textureX) * (dist.y - textureY) < 0.0;
-    if ((tmp != (textureX * dist.y < 0.0)) || (tmp != (dist.x * textureY - thirdX * dist.y < 0.0)))
+        ((thirdX * denom - dist.x) * textureY + (thirdX - textureX) * (dist.y - textureY * denom) < 0.0) ^ (denom < 0);
+    if ((tmp != ((textureX * dist.y < 0.0) ^ (denom < 0))) || (tmp != ((dist.x * textureY - thirdX * dist.y < 0.0) ^ (denom < 0))))
         return inf;
     *hitShape = this;
     return time;
