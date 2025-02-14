@@ -1,4 +1,4 @@
-FUNC := g++
+FUNC := clang++
 output := -o 
 copt := -c 
 SRC_DIR := ./
@@ -22,13 +22,10 @@ $(OBJ_DIR)aabb.obj: $(SRC_DIR)aabb.cpp $(SRC_DIR)aabb.h
 $(OBJ_DIR)bvh.obj: $(SRC_DIR)bvh.cpp $(SRC_DIR)bvh.h
 	$(FUNC) $(output)$(OBJ_DIR)bvh.obj $(copt) $(SRC_DIR)bvh.cpp $(FLAGS)
 
-$(OBJ_DIR)vector.obj: $(SRC_DIR)vector.cpp $(SRC_DIR)vector.h
-	$(FUNC) $(output)$(OBJ_DIR)vector.obj $(copt) $(SRC_DIR)vector.cpp $(FLAGS)
-
 $(OBJ_DIR)mandel.obj: $(SRC_DIR)mandel.cpp $(SRC_DIR)mandel.h $(OBJ_DIR)box.obj
 	$(FUNC) $(output)$(OBJ_DIR)mandel.obj $(copt) $(SRC_DIR)mandel.cpp $(FLAGS)
 
-$(OBJ_DIR)camera.obj: $(SRC_DIR)camera.cpp $(SRC_DIR)camera.h $(OBJ_DIR)vector.obj
+$(OBJ_DIR)camera.obj: $(SRC_DIR)camera.cpp $(SRC_DIR)camera.h
 	$(FUNC) $(output)$(OBJ_DIR)camera.obj $(copt) $(SRC_DIR)camera.cpp $(FLAGS)
 
 $(OBJ_DIR)light.obj: $(SRC_DIR)light.cpp $(SRC_DIR)light.h $(OBJ_DIR)camera.obj

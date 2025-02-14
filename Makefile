@@ -1,8 +1,8 @@
-FUNC := g++
+FUNC := clang++
 copt := -c 
 OBJ_DIR := ./bin/
 OUTPUT_DIR := ./output/
-FLAGS := -O3 -lm -g -Werror -lstdc++ -flto
+FLAGS := -O3 -lm -g -Werror -lstdc++ -flto -fuse-ld=lld
 
 CPP_FILES := $(wildcard src/*.cpp)
 OBJ_FILES := $(addprefix $(OBJ_DIR),$(notdir $(CPP_FILES:.cpp=.obj)))
