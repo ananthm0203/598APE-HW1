@@ -19,7 +19,7 @@
 #include <sys/time.h>
 #include <vector>
 
-#define TILE_SIZE (4)
+#define TILE_SIZE (8)
 
 using namespace std;
 

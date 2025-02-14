@@ -31,10 +31,9 @@ inline double ground(double e) {
 }
 
 inline double fix(double a) {
-    a = fmod(a, 1.);
-    if (a < 0)
-        a += 1.;
-    return a;
+    auto r = a - (long)a;
+    if (r < 0) r += 1;
+    return r;
 }
 
 char lowerCase(char c);
