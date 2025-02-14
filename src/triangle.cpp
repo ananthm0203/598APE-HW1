@@ -40,9 +40,9 @@ Triangle::Triangle(Vector c, Vector b, Vector a, Texture* t)
     up.y        = ycos * zcos + xsin * ysin * zsin;
     up.z        = -xcos * ysin;
     Vector temp = vect.cross(right);
-    Vector np   = solveScalers(right, up, vect, a - c);
-    textureY    = np.y;
-    thirdX      = np.x;
+    auto [np, denom]   = solveScalers(right, up, vect, a - c);
+    textureY    = np.y / denom;
+    thirdX      = np.x / denom;
 
     d = -vect.dot(center);
 }
@@ -51,7 +51,9 @@ double Triangle::getIntersection(const Ray& ray, const Shape** hitShape) const {
     double time = Plane::getIntersection(ray, hitShape);
     if (time == inf)
         return time;
-    Vector        dist = solveScalers(right, up, vect, ray.point + ray.vector * time - center);
+    auto [dist, denom] = solveScalers(right, up, vect, ray.point + ray.vector * time - center);
+    dist.x /= denom;
+    dist.y /= denom;
     unsigned char tmp =
         (thirdX - dist.x) * textureY + (thirdX - textureX) * (dist.y - textureY) < 0.0;
     if ((tmp != (textureX * dist.y < 0.0)) || (tmp != (dist.x * textureY - thirdX * dist.y < 0.0)))
@@ -66,7 +68,9 @@ bool Triangle::getLightIntersection(const Ray& ray, double* fill) const {
     const double r    = -norm / t;
     if (r <= 0. || r >= 1.)
         return false;
-    Vector dist = solveScalers(right, up, vect, ray.point + ray.vector * r - center);
+    auto [dist, denom] = solveScalers(right, up, vect, ray.point + ray.vector * r - center);
+    dist.x /= denom;
+    dist.y /= denom;
 
     unsigned char tmp =
         (thirdX - dist.x) * textureY + (thirdX - textureX) * (dist.y - textureY) < 0.0;
@@ -77,8 +81,8 @@ bool Triangle::getLightIntersection(const Ray& ray, double* fill) const {
         return true;
     unsigned char temp[4];
     double        amb, op, ref;
-    texture->getColor(temp, &amb, &op, &ref, fix(dist.x / textureX - .5),
-                      fix(dist.y / textureY - .5));
+    texture->getColor(temp, &amb, &op, &ref, fix(dist.x * textureX_inv - .5),
+                      fix(dist.y * textureY_inv - .5));
     if (op > 1 - 1E-6)
         return true;
     fill[0] *= temp[0] / 255.;

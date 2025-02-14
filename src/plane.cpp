@@ -99,11 +99,11 @@ bool Plane::getLightIntersection(const Ray& ray, double* fill) const {
 
     if (texture->opacity > 1 - 1E-6)
         return true;
-    Vector        dist = solveScalers(right, up, vect, ray.point - center);
+    auto [dist, denom] = solveScalers(right, up, vect, ray.point - center);
     unsigned char temp[4];
     double        amb, op, ref;
-    texture->getColor(temp, &amb, &op, &ref, fix(dist.x / textureX - .5),
-                      fix(dist.y / textureY - .5));
+    texture->getColor(temp, &amb, &op, &ref, fix(dist.x / (textureX * denom) - .5),
+                      fix(dist.y / (textureY * denom) - .5));
     if (op > 1 - 1E-6)
         return true;
     fill[0] *= temp[0] / 255.;
@@ -117,9 +117,9 @@ void Plane::move() {
 }
 void Plane::getColor(unsigned char* toFill, double* am, double* op, double* ref, const Ray& ray,
                      unsigned int depth) const {
-    Vector dist = solveScalers(right, up, vect, ray.point - center);
-    texture->getColor(toFill, am, op, ref, fix(dist.x / textureX - .5),
-                      fix(dist.y / textureY - .5));
+    auto [dist, denom] = solveScalers(right, up, vect, ray.point - center);
+    texture->getColor(toFill, am, op, ref, fix(dist.x / (textureX * denom) - .5),
+                      fix(dist.y / (textureY * denom) - .5));
 }
 unsigned char Plane::reversible() const {
     return 1;
@@ -129,11 +129,11 @@ Vector Plane::getNormal(const Vector& point) const {
     if (normalMap == NULL)
         return vect;
     else {
-        Vector        dist = solveScalers(right, up, vect, point - center);
+        auto [dist, denom] = solveScalers(right, up, vect, point - center);
         double        am, ref, op;
         unsigned char norm[3];
-        normalMap->getColor(norm, &am, &op, &ref, fix(dist.x / mapX - .5 + mapOffX),
-                            fix(dist.y / mapY - .5 + mapOffY));
+        normalMap->getColor(norm, &am, &op, &ref, fix(dist.x / (mapX * denom) - .5 + mapOffX),
+                            fix(dist.y / (mapY * denom) - .5 + mapOffY));
         Vector ret = ((norm[0] - 128) * right + (norm[1] - 128) * up + norm[2] * vect).normalize();
         return ret;
     }

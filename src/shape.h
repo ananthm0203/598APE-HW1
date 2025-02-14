@@ -12,6 +12,7 @@ public:
     Vector   center;
     Texture* texture;
     double   textureX, textureY, mapX, mapY, mapOffX, mapOffY;
+    double textureX_inv, textureY_inv, mapX_inv, mapY_inv;
     Texture* normalMap;
 
     virtual double        getIntersection(const Ray& ray, const Shape** hitShape) const = 0;

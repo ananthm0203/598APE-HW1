@@ -529,12 +529,16 @@ void setFrame(const char* animateFile, Autonoma& MAIN_DATA, int frame, int frame
                     shape->setRoll(result);
                 } else if (streq(field_type, "textureX")) {
                     shape->textureX = result;
+                    shape->textureX_inv = 1/result;
                 } else if (streq(field_type, "textureY")) {
                     shape->textureY = result;
+                    shape->textureY_inv = 1/result;
                 } else if (streq(field_type, "mapX")) {
                     shape->mapX = result;
+                    shape->mapX_inv = 1/result;
                 } else if (streq(field_type, "mapY")) {
                     shape->mapY = result;
+                    shape->mapY_inv = 1/result;
                 } else if (streq(field_type, "mapOffX")) {
                     shape->mapOffX = result;
                 } else if (streq(field_type, "mapOffY")) {
