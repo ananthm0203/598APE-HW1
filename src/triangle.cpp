@@ -47,7 +47,7 @@ Triangle::Triangle(Vector c, Vector b, Vector a, Texture* t)
     d = -vect.dot(center);
 }
 
-double Triangle::getIntersection(const Ray& ray, const Shape** hitShape) const {
+double Triangle::getIntersection(const Ray& ray, const Shape*& hitShape) const {
     double time = Plane::getIntersection(ray, hitShape);
     if (time == inf)
         return time;
@@ -57,11 +57,11 @@ double Triangle::getIntersection(const Ray& ray, const Shape** hitShape) const {
         ((thirdX * denom - dist.x) * textureY + (thirdX - textureX) * (dist.y - textureY * denom) < 0.0) ^ (denom < 0);
     if ((tmp != ((textureX * dist.y < 0.0) ^ (denom < 0))) || (tmp != ((dist.x * textureY - thirdX * dist.y < 0.0) ^ (denom < 0))))
         return inf;
-    *hitShape = this;
+    hitShape = this;
     return time;
 }
 
-bool Triangle::getLightIntersection(const Ray& ray, double* fill) const {
+bool Triangle::getLightIntersection(const Ray& ray, double fill[3]) const {
     const double t    = ray.vector.dot(vect);
     const double norm = vect.dot(ray.point) + d;
     const double r    = -norm / t;
@@ -80,7 +80,7 @@ bool Triangle::getLightIntersection(const Ray& ray, double* fill) const {
         return true;
     unsigned char temp[4];
     double        amb, op, ref;
-    texture->getColor(temp, &amb, &op, &ref, fix(dist.x * textureX_inv - .5),
+    texture->getColor(temp, amb, op, ref, fix(dist.x * textureX_inv - .5),
                       fix(dist.y * textureY_inv - .5));
     if (op > 1 - 1E-6)
         return true;

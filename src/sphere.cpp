@@ -6,7 +6,7 @@ Sphere::Sphere(const Vector& c, Texture* t, double ya, double pi, double ro, dou
     normalMap           = NULL;
     radius              = rad;
 }
-bool Sphere::getLightIntersection(const Ray& ray, double* fill) const {
+bool Sphere::getLightIntersection(const Ray& ray, double fill[3]) const {
     const double A            = ray.vector.mag2();
     const double B            = 2 * ray.vector.dot(ray.point - center);
     const double C            = (ray.point - center).mag2() - radius * radius;
@@ -25,7 +25,7 @@ bool Sphere::getLightIntersection(const Ray& ray, double* fill) const {
     double        data3 = atan2(point.z - center.z, point.x - center.x);
     unsigned char temp[4];
     double        amb, op, ref;
-    texture->getColor(temp, &amb, &op, &ref, fix((yaw + data2) / M_TWO_PI / textureX),
+    texture->getColor(temp, amb, op, ref, fix((yaw + data2) / M_TWO_PI / textureX),
                       fix((pitch / M_TWO_PI - (data3))) / textureY);
     if (op > 1 - 1E-6)
         return true;
@@ -34,7 +34,7 @@ bool Sphere::getLightIntersection(const Ray& ray, double* fill) const {
     fill[2] *= temp[2] / 255.;
     return false;
 }
-double Sphere::getIntersection(const Ray& ray, const Shape** hitShape) const {
+double Sphere::getIntersection(const Ray& ray, const Shape*& hitShape) const {
     const double A            = ray.vector.mag2();
     const double B            = 2 * ray.vector.dot(ray.point - center);
     const double C            = (ray.point - center).mag2() - radius * radius;
@@ -47,7 +47,7 @@ double Sphere::getIntersection(const Ray& ray, const Shape** hitShape) const {
         const double root2 = (-B + desc) / (2 * A);
         double       time  = (root1 > 0) ? (root1) : ((root2 > 0) ? root2 : inf);
         if (time != inf) {
-            *hitShape = this;
+            hitShape = this;
         }
         return time;
     }
@@ -59,7 +59,7 @@ unsigned char Sphere::reversible() const {
     return 0;
 }
 
-void Sphere::getColor(unsigned char* toFill, double* amb, double* op, double* ref, const Ray& ray,
+void Sphere::getColor(unsigned char toFill[3], double& amb, double& op, double& ref, const Ray& ray,
                       unsigned int depth) const {
     double data3 = (center.y - ray.point.y + radius) / (2 * radius);
     double data2 = atan2(ray.point.z - center.z, ray.point.x - center.x);
@@ -94,7 +94,7 @@ Vector Sphere::getNormal(const Vector& point) const {
     Vector        up    = Vector(vect.z, vect.y, -vect.x);
     double        am, ref, op;
     unsigned char norm[3];
-    normalMap->getColor(norm, &am, &op, &ref, fix(((mapOffX + mapOffX) + data2) / M_TWO_PI / mapX),
+    normalMap->getColor(norm, am, op, ref, fix(((mapOffX + mapOffX) + data2) / M_TWO_PI / mapX),
                         fix(((mapOffY + mapOffY) / M_TWO_PI - data3) / mapY));
     return ((norm[0] - 128) * right + (norm[1] - 128) * up + norm[2] * vect).normalize();
 }

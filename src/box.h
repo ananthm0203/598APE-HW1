@@ -6,8 +6,8 @@ class Box : public Plane {
 public:
     Box(const Vector& c, Texture* t, double ya, double pi, double ro, double tx, double ty);
     Box(const Vector& c, Texture* t, double ya, double pi, double ro, double tx);
-    double       getIntersection(const Ray& ray, const Shape** hitShape) const override;
-    bool         getLightIntersection(const Ray& ray, double* fill) const override;
+    double       getIntersection(const Ray& ray, const Shape*& hitShape) const override;
+    bool         getLightIntersection(const Ray& ray, double fill[3]) const override;
     virtual AABB getBounds() const override {
         Vector half_size(textureX / 2, textureY / 2,
                          0.01); // Small thickness in Z direction

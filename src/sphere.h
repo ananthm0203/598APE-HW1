@@ -7,10 +7,10 @@ public:
     double radius;
 
     Sphere(const Vector& c, Texture* t, double ya, double pi, double ro, double radius);
-    double getIntersection(const Ray& ray, const Shape** hitShape) const override;
+    double getIntersection(const Ray& ray, const Shape*& hitShape) const override;
     void   move() override;
-    bool   getLightIntersection(const Ray& ray, double* fill) const override;
-    void   getColor(unsigned char* toFill, double* am, double* op, double* ref, const Ray& ray,
+    bool   getLightIntersection(const Ray& ray, double fill[3]) const override;
+    void   getColor(unsigned char* toFill, double& am, double& op, double& ref, const Ray& ray,
                     unsigned int depth) const override;
     Vector getNormal(const Vector& point) const override;
     unsigned char reversible() const override;

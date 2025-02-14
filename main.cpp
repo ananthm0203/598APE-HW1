@@ -79,12 +79,12 @@ void getLight(double* tColor, const Autonoma& aut, const Vector& point, const Ve
     }
 }
 
-void calcColor(unsigned char* toFill, const Autonoma& c, const Ray& ray, unsigned int depth) {
+void calcColor(unsigned char toFill[3], const Autonoma& c, const Ray& ray, unsigned int depth) {
     if (depth >= c.depth) {
         return;
     }
     const Shape* hitShape = nullptr;
-    double       time     = c.bvh->getIntersection(ray, &hitShape);
+    double       time     = c.bvh->getIntersection(ray, hitShape);
 
     if (!hitShape || time == inf) {
         double       opacity, reflection, ambient;
@@ -93,13 +93,13 @@ void calcColor(unsigned char* toFill, const Autonoma& c, const Ray& ray, unsigne
         const double z     = temp.z;
         const double me    = (temp.y < 0) ? -temp.y : temp.y;
         const double angle = atan2(z, x);
-        c.skybox->getColor(toFill, &ambient, &opacity, &reflection, fix(angle / M_TWO_PI), fix(me));
+        c.skybox->getColor(toFill, ambient, opacity, reflection, fix(angle * M_TWO_PI_INV), fix(me));
         return;
     }
 
     Vector intersect = time * ray.vector + ray.point;
     double opacity, reflection, ambient;
-    hitShape->getColor(toFill, &ambient, &opacity, &reflection, Ray(intersect, ray.vector), depth);
+    hitShape->getColor(toFill, ambient, opacity, reflection, Ray(intersect, ray.vector), depth);
 
     double lightData[3];
     getLight(lightData, c, intersect, hitShape->getNormal(intersect), hitShape->reversible());
@@ -140,8 +140,11 @@ void        refresh(const Autonoma& c) {
                         int    n  = y * W + x;
                         Vector ra = c.camera.forward + ((double)x / W - 0.5) * c.camera.right +
                                     (0.5 - (double)y / H) * c.camera.up;
-                        unsigned char* toFill = DATA + (3 * n);
+                        unsigned char toFill[3];
                         calcColor(toFill, c, Ray(c.camera.focus, ra), 0);
+                        DATA[3 * n] = toFill[0];
+                        DATA[3 * n + 1] = toFill[1];
+                        DATA[3 * n + 2] = toFill[2];
                     }
                 }
             }

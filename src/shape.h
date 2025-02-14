@@ -15,11 +15,11 @@ public:
     double textureX_inv, textureY_inv, mapX_inv, mapY_inv;
     Texture* normalMap;
 
-    virtual double        getIntersection(const Ray& ray, const Shape** hitShape) const = 0;
-    virtual bool          getLightIntersection(const Ray& ray, double* fill) const      = 0;
+    virtual double        getIntersection(const Ray& ray, const Shape*& hitShape) const = 0;
+    virtual bool          getLightIntersection(const Ray& ray, double fill[3]) const      = 0;
     virtual void          move()                                                        = 0;
     virtual unsigned char reversible() const                                            = 0;
-    virtual void          getColor(unsigned char* toFill, double* am, double* op, double* ref,
+    virtual void          getColor(unsigned char toFill[3], double& am, double& op, double& ref,
                                    const Ray& ray, unsigned int depth) const            = 0;
     virtual Vector        getNormal(const Vector& point) const                          = 0;
     virtual void          setAngles(double yaw, double pitch, double roll)              = 0;

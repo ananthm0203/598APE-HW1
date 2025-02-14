@@ -78,19 +78,19 @@ void Plane::setRoll(double c) {
     d = -vect.dot(center);
 }
 
-double Plane::getIntersection(const Ray& ray, const Shape** hitShape) const {
+double Plane::getIntersection(const Ray& ray, const Shape*& hitShape) const {
     const double t    = ray.vector.dot(vect);
     const double norm = vect.dot(ray.point) + d;
     const double r    = -norm / t;
 
     if (r > 0) {
-        *hitShape = this;
+        hitShape = this;
         return r;
     }
     return inf;
 }
 
-bool Plane::getLightIntersection(const Ray& ray, double* fill) const {
+bool Plane::getLightIntersection(const Ray& ray, double fill[3]) const {
     const double t    = ray.vector.dot(vect);
     const double norm = vect.dot(ray.point) + d;
     const double r    = -norm / t;
@@ -102,7 +102,7 @@ bool Plane::getLightIntersection(const Ray& ray, double* fill) const {
     auto [dist, denom] = solveScalers(right, up, vect, ray.point - center);
     unsigned char temp[4];
     double        amb, op, ref;
-    texture->getColor(temp, &amb, &op, &ref, fix(dist.x / (textureX * denom) - .5),
+    texture->getColor(temp, amb, op, ref, fix(dist.x / (textureX * denom) - .5),
                       fix(dist.y / (textureY * denom) - .5));
     if (op > 1 - 1E-6)
         return true;
@@ -115,7 +115,7 @@ bool Plane::getLightIntersection(const Ray& ray, double* fill) const {
 void Plane::move() {
     d = -vect.dot(center);
 }
-void Plane::getColor(unsigned char* toFill, double* am, double* op, double* ref, const Ray& ray,
+void Plane::getColor(unsigned char toFill[3], double& am, double& op, double& ref, const Ray& ray,
                      unsigned int depth) const {
     auto [dist, denom] = solveScalers(right, up, vect, ray.point - center);
     texture->getColor(toFill, am, op, ref, fix(dist.x / (textureX * denom) - .5),
@@ -132,7 +132,7 @@ Vector Plane::getNormal(const Vector& point) const {
         auto [dist, denom] = solveScalers(right, up, vect, point - center);
         double        am, ref, op;
         unsigned char norm[3];
-        normalMap->getColor(norm, &am, &op, &ref, fix(dist.x / (mapX * denom) - .5 + mapOffX),
+        normalMap->getColor(norm, am, op, ref, fix(dist.x / (mapX * denom) - .5 + mapOffX),
                             fix(dist.y / (mapY * denom) - .5 + mapOffY));
         Vector ret = ((norm[0] - 128) * right + (norm[1] - 128) * up + norm[2] * vect).normalize();
         return ret;

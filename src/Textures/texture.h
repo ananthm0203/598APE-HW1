@@ -1,6 +1,7 @@
 #ifndef __TEXTURE_H__
 #define __TEXTURE_H__
 #define M_TWO_PI 6.28318530718
+#define M_TWO_PI_INV  (1 / M_TWO_PI)
 #if defined(_MSC_VER)
 #define popen _popen
 #endif
@@ -13,7 +14,7 @@ public:
     /** from 0 to 1 **/
     double opacity, reflection, ambient;
     Texture(double am, double op, double ref);
-    virtual void getColor(unsigned char* toFill, double* am, double* opacity, double* reflection,
+    virtual void getColor(unsigned char toFill[3], double& am, double& opacity, double& reflection,
                           double x, double y) = 0;
     Texture*     clone();
 };
