@@ -36,13 +36,13 @@ Triangle::Triangle(Vector c, Vector b, Vector a, Texture* t)
     pitch = acos(ycos);
     ysin  = sqrt(1 - ycos * ycos);
 
-    up.x        = -xsin * ysin * zcos + ycos * zsin;
-    up.y        = ycos * zcos + xsin * ysin * zsin;
-    up.z        = -xcos * ysin;
-    Vector temp = vect.cross(right);
-    auto [np, denom]   = solveScalers(right, up, vect, a - c);
-    textureY    = np.y / denom;
-    thirdX      = np.x / denom;
+    up.x             = -xsin * ysin * zcos + ycos * zsin;
+    up.y             = ycos * zcos + xsin * ysin * zsin;
+    up.z             = -xcos * ysin;
+    Vector temp      = vect.cross(right);
+    auto [np, denom] = solveScalers(right, up, vect, a - c);
+    textureY         = np.y / denom;
+    thirdX           = np.x / denom;
 
     d = -vect.dot(center);
 }
@@ -54,8 +54,11 @@ double Triangle::getIntersection(const Ray& ray, const Shape*& hitShape) const {
     auto [dist, denom] = solveScalers(right, up, vect, ray.point + ray.vector * time - center);
     // Remove divisions by opting for sign comps and switches
     unsigned char tmp =
-        ((thirdX * denom - dist.x) * textureY + (thirdX - textureX) * (dist.y - textureY * denom) < 0.0) ^ (denom < 0);
-    if ((tmp != ((textureX * dist.y < 0.0) ^ (denom < 0))) || (tmp != ((dist.x * textureY - thirdX * dist.y < 0.0) ^ (denom < 0))))
+        ((thirdX * denom - dist.x) * textureY + (thirdX - textureX) * (dist.y - textureY * denom) <
+         0.0) ^
+        (denom < 0);
+    if ((tmp != ((textureX * dist.y < 0.0) ^ (denom < 0))) ||
+        (tmp != ((dist.x * textureY - thirdX * dist.y < 0.0) ^ (denom < 0))))
         return inf;
     hitShape = this;
     return time;

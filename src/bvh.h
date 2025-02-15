@@ -9,10 +9,10 @@
 
 class BVHNode {
 public:
-    AABB                     bounds;
-    std::unique_ptr<BVHNode> left;
-    std::unique_ptr<BVHNode> right;
-    Shape*                   shape;
+    AABB                     bounds; //6 doubles, 48 bytes
+    std::unique_ptr<BVHNode> left; //8 bytes
+    std::unique_ptr<BVHNode> right; //8 bytes
+    Shape*                   shape; //8 bytes
 
     BVHNode() : bounds(), left(nullptr), right(nullptr), shape(nullptr) {}
     ~BVHNode() {}
@@ -30,7 +30,7 @@ private:
     std::unique_ptr<BVHNode> buildBVH(std::vector<std::unique_ptr<Shape>>& shapes, int start,
                                       int end);
     double getNodeIntersection(const BVHNode* node, const Ray& ray, const Shape*& hitShape) const;
-    bool   getNodeLightIntersection(const BVHNode* node, const Ray& ray, double* fill) const;
+    bool   getNodeLightIntersection(const BVHNode* node, const Ray& ray, double fill[3]) const;
 };
 
 #endif

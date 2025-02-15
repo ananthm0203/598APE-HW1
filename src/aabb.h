@@ -28,6 +28,7 @@ public:
 
         return tmax >= tmin && tmax > 0;
     }
+
     void expand(const AABB& other);
     void expand(const Vector& point);
 };

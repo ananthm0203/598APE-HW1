@@ -10,24 +10,6 @@ void Autonoma::addShape(std::unique_ptr<Shape>&& r) {
     shapes.push_back(std::move(r));
 }
 
-void Autonoma::removeShape(Shape* s) {
-    for (int i = 0; i < shapes.size(); ++i) {
-        if (shapes[i].get() == s) {
-            shapes.erase(shapes.begin() + i);
-            return;
-        }
-    }
-}
-
-void Autonoma::addLight(std::unique_ptr<Light>&& r) {
+void Autonoma::addLight(Light&& r) {
     lights.push_back(std::move(r));
-}
-
-void Autonoma::removeLight(Light* s) {
-    for (int i = 0; i < shapes.size(); ++i) {
-        if (lights[i].get() == s) {
-            lights.erase(lights.begin() + i);
-            return;
-        }
-    }
 }

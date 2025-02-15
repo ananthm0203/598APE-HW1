@@ -17,16 +17,16 @@ struct Autonoma {
     Texture*                            skybox;
     unsigned int                        depth;
     std::vector<std::unique_ptr<Shape>> shapes;
-    std::vector<std::unique_ptr<Light>> lights;
+    std::vector<Light>                  lights;
     std::unique_ptr<BVH>                bvh;
 
     Autonoma(const Camera& c);
     Autonoma(const Camera& c, Texture* tex);
 
     void addShape(std::unique_ptr<Shape>&& s);
-    void removeShape(Shape* s);
-    void addLight(std::unique_ptr<Light>&& s);
-    void removeLight(Light* s);
+    // void removeShape(Shape* s);
+    void addLight(Light&& s);
+    // void removeLight(Light* s);
 };
 
 #endif

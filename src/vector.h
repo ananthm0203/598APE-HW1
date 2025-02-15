@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define inf std::numeric_limits<double>::infinity() 
+#define inf std::numeric_limits<double>::infinity()
 
 class Vector {
 public:
@@ -60,10 +60,9 @@ public:
     inline Vector operator+(const Vector& rhs) const {
         return Vector(x + rhs.x, y + rhs.y, z + rhs.z);
     }
-    /*
-    Vector Vector::operator * (const Vector a) {
-       return Vector(y*a.z-z*a.y, z*a.x-x*a.z, x*a.y-y*a.x);
-    }*/
+
+    //inline Vector operator*(const Vector a) const { return Vector(a.x * x, a.y * y, a.z * z); }
+
     inline Vector operator*(const double rhs) const { return Vector(x * rhs, y * rhs, z * rhs); }
     inline Vector operator*(const float rhs) const { return Vector(x * rhs, y * rhs, z * rhs); }
     inline Vector operator*(const int rhs) const { return Vector(x * rhs, y * rhs, z * rhs); }
@@ -127,7 +126,8 @@ inline Vector operator/(const float a, const Vector& b) {
     return Vector(a / b.x, a / b.y, a / b.z);
 }
 
-inline std::pair<Vector, double> solveScalers(const Vector& v1, const Vector& v2, const Vector& v3, const Vector& C) {
+inline std::pair<Vector, double> solveScalers(const Vector& v1, const Vector& v2, const Vector& v3,
+                                              const Vector& C) {
     double denom = v1.z * v2.y * v3.x - v1.y * v2.z * v3.x - v1.z * v2.x * v3.y +
                    v1.x * v2.z * v3.y + v1.y * v2.x * v3.z - v1.x * v2.y * v3.z;
     double a = C.z * v2.y * v3.x - C.y * v2.z * v3.x - C.z * v2.x * v3.y + C.x * v2.z * v3.y +

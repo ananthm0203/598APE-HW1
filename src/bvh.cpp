@@ -91,7 +91,7 @@ bool BVH::getLightIntersection(const Ray& ray, double fill[3]) const {
     return getNodeLightIntersection(root.get(), ray, fill);
 }
 
-bool BVH::getNodeLightIntersection(const BVHNode* node, const Ray& ray, double* fill) const {
+bool BVH::getNodeLightIntersection(const BVHNode* node, const Ray& ray, double fill[3]) const {
     if (!node->bounds.intersect(ray)) {
         return false;
     }

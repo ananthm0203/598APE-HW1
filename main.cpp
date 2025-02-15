@@ -54,10 +54,10 @@ void getLight(double* tColor, const Autonoma& aut, const Vector& point, const Ve
     tColor[0] = tColor[1] = tColor[2] = 0.;
     for (const auto& light : aut.lights) {
         double lightColor[3];
-        lightColor[0] = light->color[0] / 255.;
-        lightColor[1] = light->color[1] / 255.;
-        lightColor[2] = light->color[2] / 255.;
-        Vector ra     = light->center - point;
+        lightColor[0] = light.color[0] / 255.;
+        lightColor[1] = light.color[1] / 255.;
+        lightColor[2] = light.color[2] / 255.;
+        Vector ra     = light.center - point;
 
         bool   hit  = aut.bvh->getLightIntersection(Ray(point + ra * .01, ra), lightColor);
         double perc = (norm.dot(ra) / (ra.mag() * norm.mag()));
@@ -93,7 +93,8 @@ void calcColor(unsigned char toFill[3], const Autonoma& c, const Ray& ray, unsig
         const double z     = temp.z;
         const double me    = (temp.y < 0) ? -temp.y : temp.y;
         const double angle = atan2(z, x);
-        c.skybox->getColor(toFill, ambient, opacity, reflection, fix(angle * M_TWO_PI_INV), fix(me));
+        c.skybox->getColor(toFill, ambient, opacity, reflection, fix(angle * M_TWO_PI_INV),
+                           fix(me));
         return;
     }
 
@@ -142,7 +143,7 @@ void        refresh(const Autonoma& c) {
                                     (0.5 - (double)y / H) * c.camera.up;
                         unsigned char toFill[3];
                         calcColor(toFill, c, Ray(c.camera.focus, ra), 0);
-                        DATA[3 * n] = toFill[0];
+                        DATA[3 * n]     = toFill[0];
                         DATA[3 * n + 1] = toFill[1];
                         DATA[3 * n + 2] = toFill[2];
                     }
@@ -334,8 +335,7 @@ Autonoma createInputs(const char* inputFile) {
                            "<color_g> <color_b>\n");
                     exit(1);
                 }
-                auto light = std::make_unique<Light>(Vector(light_x, light_y, light_z), color_r,
-                                                     color_g, color_b);
+                Light light(Vector(light_x, light_y, light_z), color_r, color_g, color_b);
                 MAIN_DATA.addLight(std::move(light));
             } else if (streq(object_type, "plane")) {
                 double plane_x, plane_y, plane_z;
@@ -531,17 +531,17 @@ void setFrame(const char* animateFile, Autonoma& MAIN_DATA, int frame, int frame
                 } else if (streq(field_type, "roll")) {
                     shape->setRoll(result);
                 } else if (streq(field_type, "textureX")) {
-                    shape->textureX = result;
-                    shape->textureX_inv = 1/result;
+                    shape->textureX     = result;
+                    shape->textureX_inv = 1 / result;
                 } else if (streq(field_type, "textureY")) {
-                    shape->textureY = result;
-                    shape->textureY_inv = 1/result;
+                    shape->textureY     = result;
+                    shape->textureY_inv = 1 / result;
                 } else if (streq(field_type, "mapX")) {
-                    shape->mapX = result;
-                    shape->mapX_inv = 1/result;
+                    shape->mapX     = result;
+                    shape->mapX_inv = 1 / result;
                 } else if (streq(field_type, "mapY")) {
-                    shape->mapY = result;
-                    shape->mapY_inv = 1/result;
+                    shape->mapY     = result;
+                    shape->mapY_inv = 1 / result;
                 } else if (streq(field_type, "mapOffX")) {
                     shape->mapOffX = result;
                 } else if (streq(field_type, "mapOffY")) {
