@@ -4,31 +4,39 @@
 #include <algorithm>
 #include <memory>
 
-BVH::BVH(std::vector<std::unique_ptr<Shape>>& shapes) {
-    root = buildBVH(shapes, 0, shapes.size());
+BVH::BVH(std::vector<std::unique_ptr<Shape>>& shapes)
+: nodes((BVHNode *)std::aligned_alloc(alignof(BVHNode), sizeof(BVHNode) * (shapes.size() * 2 - 1))), nodes_used(0) {
+    // We know the max amount of nodes in the BVH will be 2 * (shapes.size()) - 1
+    // TODO: make aligned
+    buildBVH(shapes, 0, shapes.size(), 0);
 }
 
-std::unique_ptr<BVHNode> BVH::buildBVH(std::vector<std::unique_ptr<Shape>>& shapes, int start,
-                                       int end) {
-    auto node = std::make_unique<BVHNode>();
+BVH::~BVH() {
+    for (size_t i = 0; i < nodes_used; ++i) {
+        nodes[i].~BVHNode();
+    }
+    free(nodes);
+}
 
-    int nShapes = end - start;
-    if (nShapes == 1) {
-        // Leaf node
-        node->shape = shapes.at(start).get();
-        // will likely call copy constructor instead of move constructor
-        // can figure out optimization later
-        node->bounds = node->shape->getBounds();
-        return node;
+void BVH::buildBVH(std::vector<std::unique_ptr<Shape>>& shapes, int start,
+                                       int end, size_t node_idx) {
+    BVHNode* nodePtr = new (nodes + node_idx) BVHNode;
+    auto& node = *nodePtr;
+
+    // Base case (end is practically guaranteed to be greater than start)
+    if (end - start <= 1) {
+        node.bounds.expand(shapes[start]->getBounds());
+        node.shape = shapes[start].get();
+        return;
     }
 
     // Calculate bounds of all shapes
-    for (int i = start; i < end; i++) {
-        node->bounds.expand(shapes[i]->getBounds());
+    for (int i = start; i < end; ++i) {
+        node.bounds.expand(shapes[i]->getBounds());
     }
 
     // Split along longest axis
-    Vector extent = node->bounds.max - node->bounds.min;
+    Vector extent = node.bounds.max - node.bounds.min;
     int    axis   = 0;
     if (extent.y > extent.x)
         axis = 1;
@@ -45,27 +53,30 @@ std::unique_ptr<BVHNode> BVH::buildBVH(std::vector<std::unique_ptr<Shape>>& shap
                          return a->getBounds().min[axis] < b->getBounds().min[axis];
                      });
 
-    node->left  = buildBVH(shapes, start, mid);
-    node->right = buildBVH(shapes, mid, end);
+    auto left_idx = ++nodes_used;
+    auto right_idx = ++nodes_used;
+    node.leftChild = left_idx;
 
-    return node;
+    buildBVH(shapes, start, mid, left_idx);
+    buildBVH(shapes, mid, end, right_idx);
 }
 
 double BVH::getIntersection(const Ray& ray, const Shape*& hitShape) const {
-    if (!root)
+    if (__builtin_expect(!nodes_used, 0))
         return inf;
-    return getNodeIntersection(root.get(), ray, hitShape);
+    return getNodeIntersection(0, ray, hitShape);
 }
 
-double BVH::getNodeIntersection(const BVHNode* node, const Ray& ray, const Shape*& hitShape) const {
-    if (!node->bounds.intersect(ray)) {
+double BVH::getNodeIntersection(size_t node_idx, const Ray& ray, const Shape*& hitShape) const {
+    const auto& node = nodes[node_idx];
+    if (!node.bounds.intersect(ray)) {
         return inf;
     }
 
-    if (node->shape) {
-        double t = node->shape->getIntersection(ray, hitShape);
+    if (node.shape) {
+        double t = node.shape->getIntersection(ray, hitShape);
         if (t != inf) {
-            hitShape = node->shape;
+            hitShape = node.shape;
         }
         return t;
     }
@@ -73,8 +84,8 @@ double BVH::getNodeIntersection(const BVHNode* node, const Ray& ray, const Shape
     const Shape* leftHitShape  = nullptr;
     const Shape* rightHitShape = nullptr;
 
-    double hitLeft  = getNodeIntersection(node->left.get(), ray, leftHitShape);
-    double hitRight = getNodeIntersection(node->right.get(), ray, rightHitShape);
+    double hitLeft  = getNodeIntersection(node.leftChild, ray, leftHitShape);
+    double hitRight = getNodeIntersection(node.leftChild+1, ray, rightHitShape);
 
     if (hitLeft < hitRight) {
         hitShape = leftHitShape;
@@ -86,24 +97,25 @@ double BVH::getNodeIntersection(const BVHNode* node, const Ray& ray, const Shape
 }
 
 bool BVH::getLightIntersection(const Ray& ray, double fill[3]) const {
-    if (!root)
+    if (__builtin_expect(!nodes_used, 0))
         return false;
-    return getNodeLightIntersection(root.get(), ray, fill);
+    return getNodeLightIntersection(0, ray, fill);
 }
 
-bool BVH::getNodeLightIntersection(const BVHNode* node, const Ray& ray, double fill[3]) const {
-    if (!node->bounds.intersect(ray)) {
+bool BVH::getNodeLightIntersection(size_t node_idx, const Ray& ray, double fill[3]) const {
+    const auto& node = nodes[node_idx];
+    if (!node.bounds.intersect(ray)) {
         return false;
     }
 
-    if (node->shape) {
-        return node->shape->getLightIntersection(ray, fill);
+    if (node.shape) {
+        return node.shape->getLightIntersection(ray, fill);
     }
 
     Shape* leftHitShape  = nullptr;
     Shape* rightHitShape = nullptr;
 
     // short circuiting
-    return getNodeLightIntersection(node->left.get(), ray, fill) ||
-           getNodeLightIntersection(node->right.get(), ray, fill);
+    return getNodeLightIntersection(node.leftChild, ray, fill) ||
+           getNodeLightIntersection(node.leftChild+1, ray, fill);
 }
