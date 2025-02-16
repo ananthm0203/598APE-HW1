@@ -7,8 +7,7 @@
 class ImageTexture : public Texture {
     /** from 0 to 1 **/
 
-    struct ImageData
-    {
+    struct ImageData {
         unsigned char* r = nullptr;
         unsigned char* g = nullptr;
         unsigned char* b = nullptr;
@@ -31,20 +30,20 @@ class ImageTexture : public Texture {
                     free(b);
                     free(a);
                 }
-                
+
                 // Take ownership of other's resources
                 r = other.r;
                 g = other.g;
                 b = other.b;
                 a = other.a;
-                
+
                 // Reset other's pointers to prevent double-free
                 other.r = nullptr;
                 other.g = nullptr;
                 other.b = nullptr;
                 other.a = nullptr;
             }
-            
+
             return *this;
         }
         ~ImageData() {
@@ -56,8 +55,8 @@ class ImageTexture : public Texture {
     };
 
 public:
-    unsigned int   w, h;
-    ImageData imageData;
+    unsigned int w, h;
+    ImageData    imageData;
     void getColor(unsigned char toFill[3], double& am, double& op, double& ref, double x, double y);
     void getColor(unsigned char toFill[3], double& am, double& op, double& ref, unsigned int x,
                   unsigned int y);

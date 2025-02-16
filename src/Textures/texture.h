@@ -1,7 +1,7 @@
 #ifndef __TEXTURE_H__
 #define __TEXTURE_H__
 #define M_TWO_PI 6.28318530718
-#define M_TWO_PI_INV  (1 / M_TWO_PI)
+#define M_TWO_PI_INV (1 / M_TWO_PI)
 #if defined(_MSC_VER)
 #define popen _popen
 #endif
@@ -32,7 +32,8 @@ inline double ground(double e) {
 
 inline double fix(double a) {
     auto r = a - (long)a;
-    if (r < 0) r += 1;
+    if (r < 0)
+        r += 1;
     return r;
 }
 

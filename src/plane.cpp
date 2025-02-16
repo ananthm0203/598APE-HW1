@@ -2,16 +2,16 @@
 
 Plane::Plane(const Vector& c, Texture* t, double ya, double pi, double ro, double tx, double ty)
     : Shape(c, t, ya, pi, ro), vect(c), right(c), up(c) {
-    textureX = tx;
-    textureY = ty;
+    textureX     = tx;
+    textureY     = ty;
     textureX_inv = 1 / textureX;
     textureY_inv = 1 / textureY;
     setAngles(yaw, pitch, roll);
     normalMap = NULL;
     mapX      = textureX;
     mapY      = textureY;
-    mapX_inv = 1/mapX;
-    mapY_inv = 1/mapY;
+    mapX_inv  = 1 / mapX;
+    mapY_inv  = 1 / mapY;
 }
 
 void Plane::setAngles(double a, double b, double c) {

@@ -21,9 +21,9 @@
 
 class alignas(64) BVHNode {
 public:
-    AABB                     bounds;
+    AABB     bounds;
     unsigned leftChild;
-    Shape*                   shape;
+    Shape*   shape;
 
     BVHNode() : bounds(), leftChild(0), shape(nullptr) {}
     ~BVHNode() = default;
@@ -38,10 +38,9 @@ public:
 
 private:
     std::unique_ptr<BVHNode> root;
-    BVHNode *nodes;
-    size_t nodes_used;
-    void buildBVH(std::vector<std::unique_ptr<Shape>>& shapes, int start,
-                                      int end, size_t node_idx);
+    BVHNode*                 nodes;
+    size_t                   nodes_used;
+    void buildBVH(std::vector<std::unique_ptr<Shape>>& shapes, int start, int end, size_t node_idx);
     double getNodeIntersection(size_t node_idx, const Ray& ray, const Shape*& hitShape) const;
     bool   getNodeLightIntersection(size_t node_idx, const Ray& ray, double fill[3]) const;
 };

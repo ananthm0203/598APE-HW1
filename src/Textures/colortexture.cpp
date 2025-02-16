@@ -33,7 +33,7 @@ void ColorTexture::getColor(unsigned char toFill[3], double& amb, double& op, do
     toFill[0] = r;
     toFill[1] = g;
     toFill[2] = b;
-    op       = opacity;
-    ref      = reflection;
-    amb      = ambient;
+    op        = opacity;
+    ref       = reflection;
+    amb       = ambient;
 }

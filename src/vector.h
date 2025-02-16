@@ -61,7 +61,7 @@ public:
         return Vector(x + rhs.x, y + rhs.y, z + rhs.z);
     }
 
-    //inline Vector operator*(const Vector a) const { return Vector(a.x * x, a.y * y, a.z * z); }
+    // inline Vector operator*(const Vector a) const { return Vector(a.x * x, a.y * y, a.z * z); }
 
     inline Vector operator*(const double rhs) const { return Vector(x * rhs, y * rhs, z * rhs); }
     inline Vector operator*(const float rhs) const { return Vector(x * rhs, y * rhs, z * rhs); }

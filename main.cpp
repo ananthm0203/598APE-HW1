@@ -1,4 +1,4 @@
-//#include<printf.h>
+// #include<printf.h>
 #include "src/Textures/colortexture.h"
 #include "src/Textures/imagetexture.h"
 #include "src/autonoma.h"
@@ -349,7 +349,7 @@ Autonoma createInputs(const char* inputFile) {
                 }
                 Texture* texture = parseTexture(f, false);
                 auto     shape = std::make_unique<Plane>(Vector(plane_x, plane_y, plane_z), texture,
-                                                     yaw, pitch, roll, tx, ty);
+                                                         yaw, pitch, roll, tx, ty);
                 shape->normalMap = parseTexture(f, true);
                 MAIN_DATA.addShape(std::move(shape));
             } else if (streq(object_type, "disk")) {
@@ -393,7 +393,7 @@ Autonoma createInputs(const char* inputFile) {
                 }
                 Texture* texture = parseTexture(f, false);
                 auto     shape = std::make_unique<Triangle>(Vector(x1, y1, z1), Vector(x2, y2, z2),
-                                                        Vector(x3, y3, z3), texture);
+                                                            Vector(x3, y3, z3), texture);
                 MAIN_DATA.addShape(std::move(shape));
                 shape->normalMap = parseTexture(f, true);
             } else if (streq(object_type, "sphere")) {
@@ -444,8 +444,8 @@ Autonoma createInputs(const char* inputFile) {
                 Vector offset(off_x, off_y, off_z);
                 for (int i = 0; i < num_polygons; i++) {
                     auto shape       = std::make_unique<Triangle>(points[polys[i].a] + offset,
-                                                            points[polys[i].b] + offset,
-                                                            points[polys[i].c] + offset, texture);
+                                                                  points[polys[i].b] + offset,
+                                                                  points[polys[i].c] + offset, texture);
                     shape->normalMap = normalMap;
                     MAIN_DATA.addShape(std::move(shape));
                 }

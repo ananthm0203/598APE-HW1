@@ -12,11 +12,11 @@ public:
     Vector   center;
     Texture* texture;
     double   textureX, textureY, mapX, mapY, mapOffX, mapOffY;
-    double textureX_inv, textureY_inv, mapX_inv, mapY_inv;
+    double   textureX_inv, textureY_inv, mapX_inv, mapY_inv;
     Texture* normalMap;
 
     virtual double        getIntersection(const Ray& ray, const Shape*& hitShape) const = 0;
-    virtual bool          getLightIntersection(const Ray& ray, double fill[3]) const      = 0;
+    virtual bool          getLightIntersection(const Ray& ray, double fill[3]) const    = 0;
     virtual void          move()                                                        = 0;
     virtual unsigned char reversible() const                                            = 0;
     virtual void          getColor(unsigned char toFill[3], double& am, double& op, double& ref,

@@ -5,7 +5,9 @@
 #include <memory>
 
 BVH::BVH(std::vector<std::unique_ptr<Shape>>& shapes)
-: nodes((BVHNode *)std::aligned_alloc(alignof(BVHNode), sizeof(BVHNode) * (shapes.size() * 2 - 1))), nodes_used(0) {
+    : nodes((BVHNode*)std::aligned_alloc(alignof(BVHNode),
+                                         sizeof(BVHNode) * (shapes.size() * 2 - 1))),
+      nodes_used(0) {
     // We know the max amount of nodes in the BVH will be 2 * (shapes.size()) - 1
     // TODO: make aligned
     buildBVH(shapes, 0, shapes.size(), 0);
@@ -18,10 +20,10 @@ BVH::~BVH() {
     free(nodes);
 }
 
-void BVH::buildBVH(std::vector<std::unique_ptr<Shape>>& shapes, int start,
-                                       int end, size_t node_idx) {
+void BVH::buildBVH(std::vector<std::unique_ptr<Shape>>& shapes, int start, int end,
+                   size_t node_idx) {
     BVHNode* nodePtr = new (nodes + node_idx) BVHNode;
-    auto& node = *nodePtr;
+    auto&    node    = *nodePtr;
 
     // Base case (end is practically guaranteed to be greater than start)
     if (end - start <= 1) {
@@ -53,7 +55,7 @@ void BVH::buildBVH(std::vector<std::unique_ptr<Shape>>& shapes, int start,
                          return a->getBounds().min[axis] < b->getBounds().min[axis];
                      });
 
-    auto left_idx = ++nodes_used;
+    auto left_idx  = ++nodes_used;
     auto right_idx = ++nodes_used;
     node.leftChild = left_idx;
 
@@ -85,7 +87,7 @@ double BVH::getNodeIntersection(size_t node_idx, const Ray& ray, const Shape*& h
     const Shape* rightHitShape = nullptr;
 
     double hitLeft  = getNodeIntersection(node.leftChild, ray, leftHitShape);
-    double hitRight = getNodeIntersection(node.leftChild+1, ray, rightHitShape);
+    double hitRight = getNodeIntersection(node.leftChild + 1, ray, rightHitShape);
 
     if (hitLeft < hitRight) {
         hitShape = leftHitShape;
@@ -117,5 +119,5 @@ bool BVH::getNodeLightIntersection(size_t node_idx, const Ray& ray, double fill[
 
     // short circuiting
     return getNodeLightIntersection(node.leftChild, ray, fill) ||
-           getNodeLightIntersection(node.leftChild+1, ray, fill);
+           getNodeLightIntersection(node.leftChild + 1, ray, fill);
 }
