@@ -1,5 +1,6 @@
 #pragma once
 #include "vector.h"
+#include <emmintrin.h>
 
 class AABB {
 public:
@@ -10,7 +11,7 @@ public:
         : min(Vector(INFINITY, INFINITY, INFINITY)), max(Vector(-INFINITY, -INFINITY, -INFINITY)) {}
     AABB(const Vector& min, const Vector& max) : min(min), max(max) {}
 
-    inline bool intersect_(const Ray& ray) const {
+    inline bool intersect_old(const Ray& ray) const {
         double tx1 = (min.x() - ray.point.x()) * ray.inv_vector.x();
         double tx2 = (max.x() - ray.point.x()) * ray.inv_vector.x();
 
