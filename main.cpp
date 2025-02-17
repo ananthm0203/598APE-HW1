@@ -99,11 +99,12 @@ void calcColor(unsigned char toFill[3], const Autonoma& c, const Ray& ray, unsig
     }
 
     Vector intersect = time * ray.vector + ray.point;
+    Vector normal    = hitShape->getNormal(intersect);
     double opacity, reflection, ambient;
     hitShape->getColor(toFill, ambient, opacity, reflection, Ray(intersect, ray.vector), depth);
 
     double lightData[3];
-    getLight(lightData, c, intersect, hitShape->getNormal(intersect), hitShape->reversible());
+    getLight(lightData, c, intersect, normal, hitShape->reversible());
     toFill[0] = (unsigned char)(toFill[0] * (ambient + lightData[0] * (1 - ambient)));
     toFill[1] = (unsigned char)(toFill[1] * (ambient + lightData[1] * (1 - ambient)));
     toFill[2] = (unsigned char)(toFill[2] * (ambient + lightData[2] * (1 - ambient)));
@@ -117,8 +118,7 @@ void calcColor(unsigned char toFill[3], const Autonoma& c, const Ray& ray, unsig
         toFill[2] = (unsigned char)(toFill[2] * opacity + col[2] * (1 - opacity));
     }
     if (reflection > 1e-6) {
-        Vector norm    = hitShape->getNormal(intersect).normalize();
-        Vector vec     = ray.vector - 2 * norm * (norm.dot(ray.vector));
+        Vector vec     = ray.vector - 2 * normal * (normal.dot(ray.vector));
         Ray    nextRay = Ray(intersect + vec * 1E-4, vec);
         calcColor(col, c, nextRay, depth + 1);
 
@@ -128,7 +128,7 @@ void calcColor(unsigned char toFill[3], const Autonoma& c, const Ray& ray, unsig
     }
 }
 
-void        refresh(const Autonoma& c) {
+void        refresh_old(const Autonoma& c) {
 #pragma omp parallel for collapse(2) schedule(dynamic, TILE_SIZE)
     for (int ty = 0; ty < H; ty += TILE_SIZE) {
         for (int tx = 0; tx < W; tx += TILE_SIZE) {
@@ -152,6 +152,43 @@ void        refresh(const Autonoma& c) {
     }
 }
 
+void refresh(const Autonoma& c) {
+    // Pre-compute camera values outside the loops
+    const Vector& forward = c.camera.forward;
+    const Vector& right   = c.camera.right;
+    const Vector& up      = c.camera.up;
+    const Vector& focus   = c.camera.focus;
+    const double  w_inv   = 1.0 / W; // hoist division out of loop
+    const double  h_inv   = 1.0 / H;
+
+#pragma omp parallel for collapse(2) schedule(dynamic, TILE_SIZE)
+    for (int ty = 0; ty < H; ty += TILE_SIZE) {
+        for (int tx = 0; tx < W; tx += TILE_SIZE) {
+            const int max_dy = std::min(TILE_SIZE, H - ty);
+            const int max_dx = std::min(TILE_SIZE, W - tx);
+
+            for (int dy = 0; dy < max_dy; ++dy) {
+                const int    y          = ty + dy;
+                const Vector y_factor   = (0.5 - y * h_inv) * up;
+                const int    base_index = y * W + tx;
+
+                for (int dx = 0; dx < max_dx; ++dx) {
+                    const int x           = tx + dx;
+                    const int pixel_index = (base_index + dx) * 3;
+
+                    Vector ra = forward + (x * w_inv - 0.5) * right + y_factor;
+
+                    unsigned char toFill[4] __attribute__((aligned(16)));
+                    calcColor(toFill, c, Ray(focus, ra), 0);
+
+                    DATA[pixel_index]     = toFill[0];
+                    DATA[pixel_index + 1] = toFill[1];
+                    DATA[pixel_index + 2] = toFill[2];
+                }
+            }
+        }
+    }
+}
 
 void outputPPM(FILE* f) {
     fprintf(f, "P6 %d %d 255 ", W, H);
