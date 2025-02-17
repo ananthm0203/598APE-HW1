@@ -155,6 +155,12 @@ void ImageTexture::readPPM(FILE* f, const char* file) {
             exit(0);
         }
 
+        ne = fpeek(f);
+        while (ne == ' ' || ne == '\n' || ne == '\t') {
+            getc(f);
+            ne = fpeek(f);
+        }
+
         imageData = ImageData(h, w);
 
         for (y = h - 1; y >= 0; y--) {
@@ -167,7 +173,7 @@ void ImageTexture::readPPM(FILE* f, const char* file) {
             }
         }
     } else if (id == '3') {
-        // Handle ASCII PPM format
+
         int ne = fpeek(f);
         while (ne == ' ' || ne == '\n' || ne == '\t') {
             getc(f);
