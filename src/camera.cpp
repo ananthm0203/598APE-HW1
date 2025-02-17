@@ -20,17 +20,17 @@ void Camera::setAngles(double a, double b, double c) {
     zcos  = cos(roll);
     zsin  = sin(roll);
 
-    forward.x = xsin * ycos * zcos + ysin * zsin;
-    forward.y = ysin * zcos - xsin * ycos * zsin;
-    forward.z = xcos * ycos;
+    forward.x() = xsin * ycos * zcos + ysin * zsin;
+    forward.y() = ysin * zcos - xsin * ycos * zsin;
+    forward.z() = xcos * ycos;
 
-    up.x = -xsin * ysin * zcos + ycos * zsin;
-    up.y = ycos * zcos + xsin * ysin * zsin;
-    up.z = -xcos * ysin;
+    up.x() = -xsin * ysin * zcos + ycos * zsin;
+    up.y() = ycos * zcos + xsin * ysin * zsin;
+    up.z() = -xcos * ysin;
 
-    right.x = xcos * zcos;
-    right.y = -xcos * zsin;
-    right.z = -xsin;
+    right.x() = xcos * zcos;
+    right.y() = -xcos * zsin;
+    right.z() = -xsin;
 }
 
 void Camera::setYaw(double a) {
@@ -38,17 +38,17 @@ void Camera::setYaw(double a) {
     xcos = cos(yaw);
     xsin = sin(yaw);
 
-    forward.x = xsin * ycos * zcos + ysin * zsin;
-    forward.y = ysin * zcos - xsin * ycos * zsin;
-    forward.z = xcos * ycos;
+    forward.x() = xsin * ycos * zcos + ysin * zsin;
+    forward.y() = ysin * zcos - xsin * ycos * zsin;
+    forward.z() = xcos * ycos;
 
-    up.x = -xsin * ysin * zcos + ycos * zsin;
-    up.y = ycos * zcos + xsin * ysin * zsin;
-    up.z = -xcos * ysin;
+    up.x() = -xsin * ysin * zcos + ycos * zsin;
+    up.y() = ycos * zcos + xsin * ysin * zsin;
+    up.z() = -xcos * ysin;
 
-    right.x = xcos * zcos;
-    right.y = -xcos * zsin;
-    right.z = -xsin;
+    right.x() = xcos * zcos;
+    right.y() = -xcos * zsin;
+    right.z() = -xsin;
 }
 
 void Camera::setPitch(double b) {
@@ -56,13 +56,13 @@ void Camera::setPitch(double b) {
     ycos  = cos(pitch);
     ysin  = sin(pitch);
 
-    forward.x = xsin * ycos * zcos + ysin * zsin;
-    forward.y = ysin * zcos - xsin * ycos * zsin;
-    forward.z = xcos * ycos;
+    forward.x() = xsin * ycos * zcos + ysin * zsin;
+    forward.y() = ysin * zcos - xsin * ycos * zsin;
+    forward.z() = xcos * ycos;
 
-    up.x = -xsin * ysin * zcos + ycos * zsin;
-    up.y = ycos * zcos + xsin * ysin * zsin;
-    up.z = -xcos * ysin;
+    up.x() = -xsin * ysin * zcos + ycos * zsin;
+    up.y() = ycos * zcos + xsin * ysin * zsin;
+    up.z() = -xcos * ysin;
 }
 
 void Camera::setRoll(double c) {
@@ -70,12 +70,12 @@ void Camera::setRoll(double c) {
     zcos = cos(roll);
     zsin = sin(roll);
 
-    forward.x = xsin * ycos * zcos + ysin * zsin;
-    forward.y = ysin * zcos - xsin * ycos * zsin;
+    forward.x() = xsin * ycos * zcos + ysin * zsin;
+    forward.y() = ysin * zcos - xsin * ycos * zsin;
 
-    up.x = -xsin * ysin * zcos + ycos * zsin;
-    up.y = ycos * zcos + xsin * ysin * zsin;
+    up.x() = -xsin * ysin * zcos + ycos * zsin;
+    up.y() = ycos * zcos + xsin * ysin * zsin;
 
-    right.x = xcos * zcos;
-    right.y = -xcos * zsin;
+    right.x() = xcos * zcos;
+    right.y() = -xcos * zsin;
 }

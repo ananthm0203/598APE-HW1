@@ -40,9 +40,9 @@ void BVH::buildBVH(std::vector<std::unique_ptr<Shape>>& shapes, int start, int e
     // Split along longest axis
     Vector extent = node.bounds.max - node.bounds.min;
     int    axis   = 0;
-    if (extent.y > extent.x)
+    if (extent.y() > extent.x())
         axis = 1;
-    if (extent.z > extent.y)
+    if (extent.z() > extent.y())
         axis = 2;
 
     // Sort shapes along the chosen axis

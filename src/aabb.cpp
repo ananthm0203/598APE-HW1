@@ -21,21 +21,21 @@
 // }
 
 void AABB::expand(const AABB& other) {
-    min.x = std::min(min.x, other.min.x);
-    min.y = std::min(min.y, other.min.y);
-    min.z = std::min(min.z, other.min.z);
+    min.x() = std::min(min.x(), other.min.x());
+    min.y() = std::min(min.y(), other.min.y());
+    min.z() = std::min(min.z(), other.min.z());
 
-    max.x = std::max(max.x, other.max.x);
-    max.y = std::max(max.y, other.max.y);
-    max.z = std::max(max.z, other.max.z);
+    max.x() = std::max(max.x(), other.max.x());
+    max.y() = std::max(max.y(), other.max.y());
+    max.z() = std::max(max.z(), other.max.z());
 }
 
 void AABB::expand(const Vector& point) {
-    min.x = std::min(min.x, point.x);
-    min.y = std::min(min.y, point.y);
-    min.z = std::min(min.z, point.z);
+    min.x() = std::min(min.x(), point.x());
+    min.y() = std::min(min.y(), point.y());
+    min.z() = std::min(min.z(), point.z());
 
-    max.x = std::max(max.x, point.x);
-    max.y = std::max(max.y, point.y);
-    max.z = std::max(max.z, point.z);
+    max.x() = std::max(max.x(), point.x());
+    max.y() = std::max(max.y(), point.y());
+    max.z() = std::max(max.z(), point.z());
 }

@@ -11,83 +11,109 @@
 
 class Vector {
 public:
-    double x, y, z;
-    Vector(double a, double b, double c) : x(a), y(b), z(c) {}
+    alignas(32) double d[3]; // Align for AVX
+
+    Vector(double a, double b, double c) {
+        d[0] = a;
+        d[1] = b;
+        d[2] = c;
+    }
+
+    double&       x() { return d[0]; }
+    double&       y() { return d[1]; }
+    double&       z() { return d[2]; }
+    const double& x() const { return d[0]; }
+    const double& y() const { return d[1]; }
+    const double& z() const { return d[2]; }
+
     inline void operator-=(const Vector& rhs) {
-        x -= rhs.x;
-        y -= rhs.y;
-        z -= rhs.z;
+        d[0] -= rhs.x();
+        d[1] -= rhs.y();
+        d[2] -= rhs.z();
     }
     inline void operator+=(const Vector& rhs) {
-        x += rhs.x;
-        y += rhs.y;
-        z += rhs.z;
+        d[0] += rhs.x();
+        d[1] += rhs.y();
+        d[2] += rhs.z();
     }
     inline void operator*=(const double rhs) {
-        x *= rhs;
-        y *= rhs;
-        z *= rhs;
+        d[0] *= rhs;
+        d[1] *= rhs;
+        d[2] *= rhs;
     }
     inline void operator*=(const float rhs) {
-        x *= rhs;
-        y *= rhs;
-        z *= rhs;
+        d[0] *= rhs;
+        d[1] *= rhs;
+        d[2] *= rhs;
     }
     inline void operator*=(const int rhs) {
-        x *= rhs;
-        y *= rhs;
-        z *= rhs;
+        d[0] *= rhs;
+        d[1] *= rhs;
+        d[2] *= rhs;
     }
     inline void operator/=(const double rhs) {
-        x /= rhs;
-        y /= rhs;
-        z /= rhs;
+        d[0] /= rhs;
+        d[1] /= rhs;
+        d[2] /= rhs;
     }
     inline void operator/=(const float rhs) {
-        x /= rhs;
-        y /= rhs;
-        z /= rhs;
+        d[0] /= rhs;
+        d[1] /= rhs;
+        d[2] /= rhs;
     }
     inline void operator/=(const int rhs) {
-        x /= rhs;
-        y /= rhs;
-        z /= rhs;
+        d[0] /= rhs;
+        d[1] /= rhs;
+        d[2] /= rhs;
     }
 
     inline Vector operator-(const Vector& rhs) const {
-        return Vector(x - rhs.x, y - rhs.y, z - rhs.z);
+        return Vector(d[0] - rhs.x(), d[1] - rhs.y(), d[2] - rhs.z());
     }
     inline Vector operator+(const Vector& rhs) const {
-        return Vector(x + rhs.x, y + rhs.y, z + rhs.z);
+        return Vector(d[0] + rhs.x(), d[1] + rhs.y(), d[2] + rhs.z());
     }
 
     // inline Vector operator*(const Vector a) const { return Vector(a.x * x, a.y * y, a.z * z); }
 
-    inline Vector operator*(const double rhs) const { return Vector(x * rhs, y * rhs, z * rhs); }
-    inline Vector operator*(const float rhs) const { return Vector(x * rhs, y * rhs, z * rhs); }
-    inline Vector operator*(const int rhs) const { return Vector(x * rhs, y * rhs, z * rhs); }
-    inline Vector operator/(const double rhs) const { return Vector(x / rhs, y / rhs, z / rhs); }
-    inline Vector operator/(const float rhs) const { return Vector(x / rhs, y / rhs, z / rhs); }
-    inline Vector operator/(const int rhs) const { return Vector(x / rhs, y / rhs, z / rhs); }
-    inline Vector cross(const Vector& a) const {
-        return Vector(y * a.z - z * a.y, z * a.x - x * a.z, x * a.y - y * a.x);
+    inline Vector operator*(const double rhs) const {
+        return Vector(d[0] * rhs, d[1] * rhs, d[2] * rhs);
     }
-    inline double mag2() const { return x * x + y * y + z * z; }
-    inline double mag() const { return sqrt(x * x + y * y + z * z); }
-    inline double dot(const Vector& a) const { return x * a.x + y * a.y + z * a.z; }
+    inline Vector operator*(const float rhs) const {
+        return Vector(d[0] * rhs, d[1] * rhs, d[2] * rhs);
+    }
+    inline Vector operator*(const int rhs) const {
+        return Vector(d[0] * rhs, d[1] * rhs, d[2] * rhs);
+    }
+    inline Vector operator/(const double rhs) const {
+        return Vector(d[0] / rhs, d[1] / rhs, d[2] / rhs);
+    }
+    inline Vector operator/(const float rhs) const {
+        return Vector(d[0] / rhs, d[1] / rhs, d[2] / rhs);
+    }
+    inline Vector operator/(const int rhs) const {
+        return Vector(d[0] / rhs, d[1] / rhs, d[2] / rhs);
+    }
+    inline Vector cross(const Vector& a) const {
+        return Vector(d[1] * a.z() - d[2] * a.y(), d[2] * a.x() - d[0] * a.z(),
+                      d[0] * a.y() - d[1] * a.x());
+    }
+    inline double mag2() const { return d[0] * d[0] + d[1] * d[1] + d[2] * d[2]; }
+    inline double mag() const { return sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]); }
+    inline double dot(const Vector& a) const { return d[0] * a.x() + d[1] * a.y() + d[2] * a.z(); }
     inline Vector normalize() const {
         double m = mag();
-        return Vector(x / m, y / m, z / m);
+        return Vector(d[0] / m, d[1] / m, d[2] / m);
     }
 
     double operator[](int i) const {
         switch (i) {
             case 0:
-                return x;
+                return x();
             case 1:
-                return y;
+                return y();
             case 2:
-                return z;
+                return z();
             default:
                 return 0;
         }
@@ -95,7 +121,7 @@ public:
 };
 
 inline Vector operator-(const Vector& b) {
-    return Vector(-b.x, -b.y, -b.z);
+    return Vector(-b.x(), -b.y(), -b.z());
 }
 
 inline Vector operator+(const Vector& b) {
@@ -103,39 +129,43 @@ inline Vector operator+(const Vector& b) {
 }
 
 inline Vector operator*(const int a, const Vector& b) {
-    return Vector(a * b.x, a * b.y, a * b.z);
+    return Vector(a * b.d[0], a * b.d[1], a * b.d[2]);
 }
 
 inline Vector operator*(const double a, const Vector& b) {
-    return Vector(a * b.x, a * b.y, a * b.z);
+    return Vector(a * b.d[0], a * b.d[1], a * b.d[2]);
 }
 
 inline Vector operator*(const float a, const Vector& b) {
-    return Vector(a * b.x, a * b.y, a * b.z);
+    return Vector(a * b.d[0], a * b.d[1], a * b.d[2]);
 }
 
 inline Vector operator/(const int a, const Vector& b) {
-    return Vector(a / b.x, a / b.y, a / b.z);
+    return Vector(a / b.d[0], a / b.d[1], a / b.d[2]);
 }
 
 inline Vector operator/(const double a, const Vector& b) {
-    return Vector(a / b.x, a / b.y, a / b.z);
+    return Vector(a / b.d[0], a / b.d[1], a / b.d[2]);
 }
 
 inline Vector operator/(const float a, const Vector& b) {
-    return Vector(a / b.x, a / b.y, a / b.z);
+    return Vector(a / b.d[0], a / b.d[1], a / b.d[2]);
 }
 
 inline std::pair<Vector, double> solveScalers(const Vector& v1, const Vector& v2, const Vector& v3,
                                               const Vector& C) {
-    double denom = v1.z * v2.y * v3.x - v1.y * v2.z * v3.x - v1.z * v2.x * v3.y +
-                   v1.x * v2.z * v3.y + v1.y * v2.x * v3.z - v1.x * v2.y * v3.z;
-    double a = C.z * v2.y * v3.x - C.y * v2.z * v3.x - C.z * v2.x * v3.y + C.x * v2.z * v3.y +
-               C.y * v2.x * v3.z - C.x * v2.y * v3.z;
-    double b = -C.z * v1.y * v3.x + C.y * v1.z * v3.x + C.z * v1.x * v3.y - C.x * v1.z * v3.y -
-               C.y * v1.x * v3.z + C.x * v1.y * v3.z;
-    double c = C.z * v1.y * v2.x - C.y * v1.z * v2.x - C.z * v1.x * v2.y + C.x * v1.z * v2.y +
-               C.y * v1.x * v2.z - C.x * v1.y * v2.z;
+    double denom = v1.d[2] * v2.d[1] * v3.d[0] - v1.d[1] * v2.d[2] * v3.d[0] -
+                   v1.d[2] * v2.d[0] * v3.d[1] + v1.d[0] * v2.d[2] * v3.d[1] +
+                   v1.d[1] * v2.d[0] * v3.d[2] - v1.d[0] * v2.d[1] * v3.d[2];
+    double a = C.d[2] * v2.d[1] * v3.d[0] - C.d[1] * v2.d[2] * v3.d[0] -
+               C.d[2] * v2.d[0] * v3.d[1] + C.d[0] * v2.d[2] * v3.d[1] +
+               C.d[1] * v2.d[0] * v3.d[2] - C.d[0] * v2.d[1] * v3.d[2];
+    double b = -C.d[2] * v1.d[1] * v3.d[0] + C.d[1] * v1.d[2] * v3.d[0] +
+               C.d[2] * v1.d[0] * v3.d[1] - C.d[0] * v1.d[2] * v3.d[1] -
+               C.d[1] * v1.d[0] * v3.d[2] + C.d[0] * v1.d[1] * v3.d[2];
+    double c = C.d[2] * v1.d[1] * v2.d[0] - C.d[1] * v1.d[2] * v2.d[0] -
+               C.d[2] * v1.d[0] * v2.d[1] + C.d[0] * v1.d[2] * v2.d[1] +
+               C.d[1] * v1.d[0] * v2.d[2] - C.d[0] * v1.d[1] * v2.d[2];
     return std::make_pair(Vector(a, b, c), denom);
 }
 

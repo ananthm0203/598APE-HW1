@@ -21,8 +21,8 @@ bool Sphere::getLightIntersection(const Ray& ray, double fill[3]) const {
     if (time >= 1.)
         return false;
     Vector        point = ray.point + ray.vector * time;
-    double        data2 = (center.y - point.y + radius) / (2 * radius);
-    double        data3 = atan2(point.z - center.z, point.x - center.x);
+    double        data2 = (center.y() - point.y() + radius) / (2 * radius);
+    double        data3 = atan2(point.z() - center.z(), point.x() - center.x());
     unsigned char temp[4];
     double        amb, op, ref;
     texture->getColor(temp, amb, op, ref, fix((yaw + data2) / M_TWO_PI / textureX),
@@ -61,8 +61,8 @@ unsigned char Sphere::reversible() const {
 
 void Sphere::getColor(unsigned char toFill[3], double& amb, double& op, double& ref, const Ray& ray,
                       unsigned int depth) const {
-    double data3 = (center.y - ray.point.y + radius) / (2 * radius);
-    double data2 = atan2(ray.point.z - center.z, ray.point.x - center.x);
+    double data3 = (center.y() - ray.point.y() + radius) / (2 * radius);
+    double data2 = atan2(ray.point.z() - center.z(), ray.point.x() - center.x());
     texture->getColor(toFill, amb, op, ref, fix((yaw + data2) / M_TWO_PI / textureX),
                       fix((pitch / M_TWO_PI - (data3)) / textureY));
 }
@@ -87,11 +87,11 @@ Vector Sphere::getNormal(const Vector& point) const {
     */
     if (normalMap == NULL)
         return vect;
-    double data3        = (center.y - point.y + radius) / (2 * radius);
-    double data2        = atan2(point.z - center.z, point.x - center.x);
+    double data3        = (center.y() - point.y() + radius) / (2 * radius);
+    double data2        = atan2(point.z() - center.z(), point.x() - center.x());
     vect                = vect.normalize();
-    Vector        right = Vector(vect.x, vect.z, -vect.y);
-    Vector        up    = Vector(vect.z, vect.y, -vect.x);
+    Vector        right = Vector(vect.x(), vect.z(), -vect.y());
+    Vector        up    = Vector(vect.z(), vect.y(), -vect.x());
     double        am, ref, op;
     unsigned char norm[3];
     normalMap->getColor(norm, am, op, ref, fix(((mapOffX + mapOffX) + data2) / M_TWO_PI / mapX),

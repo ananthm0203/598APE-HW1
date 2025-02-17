@@ -15,25 +15,25 @@ Plane::Plane(const Vector& c, Texture* t, double ya, double pi, double ro, doubl
 }
 
 void Plane::setAngles(double a, double b, double c) {
-    yaw     = a;
-    pitch   = b;
-    roll    = c;
-    xcos    = cos(yaw);
-    xsin    = sin(yaw);
-    ycos    = cos(pitch);
-    ysin    = sin(pitch);
-    zcos    = cos(roll);
-    zsin    = sin(roll);
-    vect.x  = xsin * ycos * zcos + ysin * zsin;
-    vect.y  = ysin * zcos - xsin * ycos * zsin;
-    vect.z  = xcos * ycos;
-    up.x    = -xsin * ysin * zcos + ycos * zsin;
-    up.y    = ycos * zcos + xsin * ysin * zsin;
-    up.z    = -xcos * ysin;
-    right.x = xcos * zcos;
-    right.y = -xcos * zsin;
-    right.z = -xsin;
-    d       = -vect.dot(center);
+    yaw       = a;
+    pitch     = b;
+    roll      = c;
+    xcos      = cos(yaw);
+    xsin      = sin(yaw);
+    ycos      = cos(pitch);
+    ysin      = sin(pitch);
+    zcos      = cos(roll);
+    zsin      = sin(roll);
+    vect.x()  = xsin * ycos * zcos + ysin * zsin;
+    vect.y()  = ysin * zcos - xsin * ycos * zsin;
+    vect.z()  = xcos * ycos;
+    up.x()    = -xsin * ysin * zcos + ycos * zsin;
+    up.y()    = ycos * zcos + xsin * ysin * zsin;
+    up.z()    = -xcos * ysin;
+    right.x() = xcos * zcos;
+    right.y() = -xcos * zsin;
+    right.z() = -xsin;
+    d         = -vect.dot(center);
 }
 
 void Plane::setYaw(double a) {
@@ -41,43 +41,43 @@ void Plane::setYaw(double a) {
     xcos = cos(yaw);
     xsin = sin(yaw);
 
-    vect.x  = xsin * ycos * zcos + ysin * zsin;
-    vect.y  = ysin * zcos - xsin * ycos * zsin;
-    vect.z  = xcos * ycos;
-    up.x    = -xsin * ysin * zcos + ycos * zsin;
-    up.y    = ycos * zcos + xsin * ysin * zsin;
-    up.z    = -xcos * ysin;
-    right.x = xcos * zcos;
-    right.y = -xcos * zsin;
-    right.z = -xsin;
-    d       = -vect.dot(center);
+    vect.x()  = xsin * ycos * zcos + ysin * zsin;
+    vect.y()  = ysin * zcos - xsin * ycos * zsin;
+    vect.z()  = xcos * ycos;
+    up.x()    = -xsin * ysin * zcos + ycos * zsin;
+    up.y()    = ycos * zcos + xsin * ysin * zsin;
+    up.z()    = -xcos * ysin;
+    right.x() = xcos * zcos;
+    right.y() = -xcos * zsin;
+    right.z() = -xsin;
+    d         = -vect.dot(center);
 }
 
 void Plane::setPitch(double b) {
-    pitch  = b;
-    ycos   = cos(pitch);
-    ysin   = sin(pitch);
-    vect.x = xsin * ycos * zcos + ysin * zsin;
-    vect.y = ysin * zcos - xsin * ycos * zsin;
-    vect.z = xcos * ycos;
-    up.x   = -xsin * ysin * zcos + ycos * zsin;
-    up.y   = ycos * zcos + xsin * ysin * zsin;
-    up.z   = -xcos * ysin;
-    d      = -vect.dot(center);
+    pitch    = b;
+    ycos     = cos(pitch);
+    ysin     = sin(pitch);
+    vect.x() = xsin * ycos * zcos + ysin * zsin;
+    vect.y() = ysin * zcos - xsin * ycos * zsin;
+    vect.z() = xcos * ycos;
+    up.x()   = -xsin * ysin * zcos + ycos * zsin;
+    up.y()   = ycos * zcos + xsin * ysin * zsin;
+    up.z()   = -xcos * ysin;
+    d        = -vect.dot(center);
 }
 
 void Plane::setRoll(double c) {
-    roll   = c;
-    zcos   = cos(roll);
-    zsin   = sin(roll);
-    vect.x = xsin * ycos * zcos + ysin * zsin;
-    vect.y = ysin * zcos - xsin * ycos * zsin;
+    roll     = c;
+    zcos     = cos(roll);
+    zsin     = sin(roll);
+    vect.x() = xsin * ycos * zcos + ysin * zsin;
+    vect.y() = ysin * zcos - xsin * ycos * zsin;
     //   vect.z = xcos*ycos;
-    up.x = -xsin * ysin * zcos + ycos * zsin;
-    up.y = ycos * zcos + xsin * ysin * zsin;
+    up.x() = -xsin * ysin * zcos + ycos * zsin;
+    up.y() = ycos * zcos + xsin * ysin * zsin;
     // up.z = -xcos*ysin;
-    right.x = xcos * zcos;
-    right.y = -xcos * zsin;
+    right.x() = xcos * zcos;
+    right.y() = -xcos * zsin;
     // right.z = -xsin;
     d = -vect.dot(center);
 }
@@ -106,8 +106,8 @@ bool Plane::getLightIntersection(const Ray& ray, double fill[3]) const {
     auto [dist, denom] = solveScalers(right, up, vect, ray.point - center);
     unsigned char temp[4];
     double        amb, op, ref;
-    texture->getColor(temp, amb, op, ref, fix(dist.x / (textureX * denom) - .5),
-                      fix(dist.y / (textureY * denom) - .5));
+    texture->getColor(temp, amb, op, ref, fix(dist.x() / (textureX * denom) - .5),
+                      fix(dist.y() / (textureY * denom) - .5));
     if (op > 1 - 1E-6)
         return true;
     fill[0] *= temp[0] / 255.;
@@ -122,8 +122,8 @@ void Plane::move() {
 void Plane::getColor(unsigned char toFill[3], double& am, double& op, double& ref, const Ray& ray,
                      unsigned int depth) const {
     auto [dist, denom] = solveScalers(right, up, vect, ray.point - center);
-    texture->getColor(toFill, am, op, ref, fix(dist.x / (textureX * denom) - .5),
-                      fix(dist.y / (textureY * denom) - .5));
+    texture->getColor(toFill, am, op, ref, fix(dist.x() / (textureX * denom) - .5),
+                      fix(dist.y() / (textureY * denom) - .5));
 }
 unsigned char Plane::reversible() const {
     return 1;
@@ -136,8 +136,8 @@ Vector Plane::getNormal(const Vector& point) const {
         auto [dist, denom] = solveScalers(right, up, vect, point - center);
         double        am, ref, op;
         unsigned char norm[3];
-        normalMap->getColor(norm, am, op, ref, fix(dist.x / (mapX * denom) - .5 + mapOffX),
-                            fix(dist.y / (mapY * denom) - .5 + mapOffY));
+        normalMap->getColor(norm, am, op, ref, fix(dist.x() / (mapX * denom) - .5 + mapOffX),
+                            fix(dist.y() / (mapY * denom) - .5 + mapOffY));
         Vector ret = ((norm[0] - 128) * right + (norm[1] - 128) * up + norm[2] * vect).normalize();
         return ret;
     }

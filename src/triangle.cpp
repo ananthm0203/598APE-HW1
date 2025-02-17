@@ -8,7 +8,7 @@ Triangle::Triangle(Vector c, Vector b, Vector a, Texture* t)
     right         = righta / textureX;
     vect          = right.cross(b - a).normalize();
 
-    xsin = -right.z;
+    xsin = -right.z();
     if (xsin < -1.)
         xsin = -1;
     else if (xsin > 1.)
@@ -16,8 +16,8 @@ Triangle::Triangle(Vector c, Vector b, Vector a, Texture* t)
     yaw  = asin(xsin);
     xcos = sqrt(1. - xsin * xsin);
 
-    zcos = right.x / xcos;
-    zsin = -right.y / xcos;
+    zcos = right.x() / xcos;
+    zsin = -right.y() / xcos;
     if (zsin < -1.)
         zsin = -1;
     else if (zsin > 1.)
@@ -28,7 +28,7 @@ Triangle::Triangle(Vector c, Vector b, Vector a, Texture* t)
         zcos = 1.;
     roll = asin(zsin);
 
-    ycos = vect.z / xcos;
+    ycos = vect.z() / xcos;
     if (ycos < -1.)
         ycos = -1;
     else if (ycos > 1.)
@@ -36,13 +36,13 @@ Triangle::Triangle(Vector c, Vector b, Vector a, Texture* t)
     pitch = acos(ycos);
     ysin  = sqrt(1 - ycos * ycos);
 
-    up.x             = -xsin * ysin * zcos + ycos * zsin;
-    up.y             = ycos * zcos + xsin * ysin * zsin;
-    up.z             = -xcos * ysin;
+    up.x()           = -xsin * ysin * zcos + ycos * zsin;
+    up.y()           = ycos * zcos + xsin * ysin * zsin;
+    up.z()           = -xcos * ysin;
     Vector temp      = vect.cross(right);
     auto [np, denom] = solveScalers(right, up, vect, a - c);
-    textureY         = np.y / denom;
-    thirdX           = np.x / denom;
+    textureY         = np.y() / denom;
+    thirdX           = np.x() / denom;
 
     d = -vect.dot(center);
 }
@@ -53,12 +53,12 @@ double Triangle::getIntersection(const Ray& ray, const Shape*& hitShape) const {
         return time;
     auto [dist, denom] = solveScalers(right, up, vect, ray.point + ray.vector * time - center);
     // Remove divisions by opting for sign comps and switches
-    unsigned char tmp =
-        ((thirdX * denom - dist.x) * textureY + (thirdX - textureX) * (dist.y - textureY * denom) <
-         0.0) ^
-        (denom < 0);
-    if ((tmp != ((textureX * dist.y < 0.0) ^ (denom < 0))) ||
-        (tmp != ((dist.x * textureY - thirdX * dist.y < 0.0) ^ (denom < 0))))
+    unsigned char tmp = ((thirdX * denom - dist.x()) * textureY +
+                             (thirdX - textureX) * (dist.y() - textureY * denom) <
+                         0.0) ^
+                        (denom < 0);
+    if ((tmp != ((textureX * dist.y() < 0.0) ^ (denom < 0))) ||
+        (tmp != ((dist.x() * textureY - thirdX * dist.y() < 0.0) ^ (denom < 0))))
         return inf;
     hitShape = this;
     return time;
@@ -71,20 +71,21 @@ bool Triangle::getLightIntersection(const Ray& ray, double fill[3]) const {
     if (r <= 0. || r >= 1.)
         return false;
     auto [dist, denom] = solveScalers(right, up, vect, ray.point + ray.vector * r - center);
-    dist.x /= denom;
-    dist.y /= denom;
+    dist.x() /= denom;
+    dist.y() /= denom;
 
     unsigned char tmp =
-        (thirdX - dist.x) * textureY + (thirdX - textureX) * (dist.y - textureY) < 0.0;
-    if ((tmp != (textureX * dist.y < 0.0)) || (tmp != (dist.x * textureY - thirdX * dist.y < 0.0)))
+        (thirdX - dist.x()) * textureY + (thirdX - textureX) * (dist.y() - textureY) < 0.0;
+    if ((tmp != (textureX * dist.y() < 0.0)) ||
+        (tmp != (dist.x() * textureY - thirdX * dist.y() < 0.0)))
         return false;
 
     if (texture->opacity > 1 - 1E-6)
         return true;
     unsigned char temp[4];
     double        amb, op, ref;
-    texture->getColor(temp, amb, op, ref, fix(dist.x * textureX_inv - .5),
-                      fix(dist.y * textureY_inv - .5));
+    texture->getColor(temp, amb, op, ref, fix(dist.x() * textureX_inv - .5),
+                      fix(dist.y() * textureY_inv - .5));
     if (op > 1 - 1E-6)
         return true;
     fill[0] *= temp[0] / 255.;

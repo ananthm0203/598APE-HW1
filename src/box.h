@@ -15,23 +15,23 @@ public:
         Vector rotated_max = center;
 
         // Account for rotation by checking all corners
-        Vector corners[8] = {Vector(-half_size.x, -half_size.y, -half_size.z),
-                             Vector(-half_size.x, -half_size.y, half_size.z),
-                             Vector(-half_size.x, half_size.y, -half_size.z),
-                             Vector(-half_size.x, half_size.y, half_size.z),
-                             Vector(half_size.x, -half_size.y, -half_size.z),
-                             Vector(half_size.x, -half_size.y, half_size.z),
-                             Vector(half_size.x, half_size.y, -half_size.z),
-                             Vector(half_size.x, half_size.y, half_size.z)};
+        Vector corners[8] = {Vector(-half_size.x(), -half_size.y(), -half_size.z()),
+                             Vector(-half_size.x(), -half_size.y(), half_size.z()),
+                             Vector(-half_size.x(), half_size.y(), -half_size.z()),
+                             Vector(-half_size.x(), half_size.y(), half_size.z()),
+                             Vector(half_size.x(), -half_size.y(), -half_size.z()),
+                             Vector(half_size.x(), -half_size.y(), half_size.z()),
+                             Vector(half_size.x(), half_size.y(), -half_size.z()),
+                             Vector(half_size.x(), half_size.y(), half_size.z())};
 
         for (const Vector& corner : corners) {
-            Vector rotated = center + right * corner.x + up * corner.y + vect * corner.z;
-            rotated_min.x  = std::min(rotated_min.x, rotated.x);
-            rotated_min.y  = std::min(rotated_min.y, rotated.y);
-            rotated_min.z  = std::min(rotated_min.z, rotated.z);
-            rotated_max.x  = std::max(rotated_max.x, rotated.x);
-            rotated_max.y  = std::max(rotated_max.y, rotated.y);
-            rotated_max.z  = std::max(rotated_max.z, rotated.z);
+            Vector rotated  = center + right * corner.x() + up * corner.y() + vect * corner.z();
+            rotated_min.x() = std::min(rotated_min.x(), rotated.x());
+            rotated_min.y() = std::min(rotated_min.y(), rotated.y());
+            rotated_min.z() = std::min(rotated_min.z(), rotated.z());
+            rotated_max.x() = std::max(rotated_max.x(), rotated.x());
+            rotated_max.y() = std::max(rotated_max.y(), rotated.y());
+            rotated_max.z() = std::max(rotated_max.z(), rotated.z());
         }
 
         return AABB(rotated_min, rotated_max);

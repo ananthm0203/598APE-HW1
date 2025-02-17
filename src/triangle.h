@@ -13,10 +13,10 @@ public:
         Vector v2 = center + right * textureX;
         Vector v3 = center + right * thirdX + up * textureY;
 
-        return AABB(Vector(std::min({v1.x, v2.x, v3.x}), std::min({v1.y, v2.y, v3.y}),
-                           std::min({v1.z, v2.z, v3.z})),
-                    Vector(std::max({v1.x, v2.x, v3.x}), std::max({v1.y, v2.y, v3.y}),
-                           std::max({v1.z, v2.z, v3.z})));
+        return AABB(Vector(std::min({v1.x(), v2.x(), v3.x()}), std::min({v1.y(), v2.y(), v3.y()}),
+                           std::min({v1.z(), v2.z(), v3.z()})),
+                    Vector(std::max({v1.x(), v2.x(), v3.x()}), std::max({v1.y(), v2.y(), v3.y()}),
+                           std::max({v1.z(), v2.z(), v3.z()})));
     }
 };
 
