@@ -2,7 +2,7 @@ FUNC := clang++
 copt := -c 
 OBJ_DIR := ./bin/
 OUTPUT_DIR := ./output/
-FLAGS := -O3 -lm -g -Werror -lstdc++ -flto -fuse-ld=lld -fopenmp=libomp
+FLAGS := -O3 -lm -g -Werror -lstdc++ -flto -fuse-ld=lld -fopenmp=libomp -march=native
 
 CPP_FILES := $(wildcard src/*.cpp)
 OBJ_FILES := $(addprefix $(OBJ_DIR),$(notdir $(CPP_FILES:.cpp=.obj)))
