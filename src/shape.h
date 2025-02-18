@@ -3,17 +3,19 @@
 #include "aabb.h"
 #include "light.h"
 #include <algorithm>
+#include <iostream>
+#include <memory>
 
 class Shape {
 public:
-    Shape(const Vector& c, Texture* t, double ya, double pi, double ro);
+    Shape(const Vector& c, std::shared_ptr<Texture> t, double ya, double pi, double ro);
     virtual ~Shape() = default;
-    double   yaw, pitch, roll, xsin, xcos, ysin, ycos, zsin, zcos;
-    Vector   center;
-    Texture* texture;
-    double   textureX, textureY, mapX, mapY, mapOffX, mapOffY;
-    double   textureX_inv, textureY_inv, mapX_inv, mapY_inv;
-    Texture* normalMap;
+    double                   yaw, pitch, roll, xsin, xcos, ysin, ycos, zsin, zcos;
+    Vector                   center;
+    std::shared_ptr<Texture> texture;
+    double                   textureX, textureY, mapX, mapY, mapOffX, mapOffY;
+    double                   textureX_inv, textureY_inv, mapX_inv, mapY_inv;
+    std::shared_ptr<Texture> normalMap;
 
     virtual double        getIntersection(const Ray& ray, const Shape*& hitShape) const = 0;
     virtual bool          getLightIntersection(const Ray& ray, double fill[3]) const    = 0;

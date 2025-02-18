@@ -1,5 +1,6 @@
 #include "disk.h"
-Disk::Disk(const Vector& c, Texture* t, double ya, double pi, double ro, double tx, double ty)
+Disk::Disk(const Vector& c, std::shared_ptr<Texture> t, double ya, double pi, double ro, double tx,
+           double ty)
     : Plane(c, t, ya, pi, ro, tx, ty) {
 }
 
@@ -29,8 +30,8 @@ bool Disk::getLightIntersection(const Ray& ray, double fill[3]) const {
         return false;
     if (texture->opacity > 1 - 1E-6)
         return true;
-    unsigned char temp[4];
-    double        amb, op, ref;
+    unsigned char temp[3] = {0, 0, 0};
+    double        amb = 0, op = 0, ref = 0;
     texture->getColor(temp, amb, op, ref, fix(dist.x() * textureX_inv - .5),
                       fix(dist.y() * textureY_inv - .5));
     if (op > 1 - 1E-6)

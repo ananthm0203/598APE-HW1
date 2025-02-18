@@ -1,6 +1,6 @@
 #include "triangle.h"
 
-Triangle::Triangle(Vector c, Vector b, Vector a, Texture* t)
+Triangle::Triangle(Vector c, Vector b, Vector a, std::shared_ptr<Texture> t)
     : Plane(Vector(0, 0, 0), t, 0., 0., 0., 0., 0.) {
     center        = c;
     Vector righta = (b - c);
@@ -82,8 +82,8 @@ bool Triangle::getLightIntersection(const Ray& ray, double fill[3]) const {
 
     if (texture->opacity > 1 - 1E-6)
         return true;
-    unsigned char temp[4];
-    double        amb, op, ref;
+    unsigned char temp[3] = {0, 0, 0};
+    double        amb = 0, op = 0, ref = 0;
     texture->getColor(temp, amb, op, ref, fix(dist.x() * textureX_inv - .5),
                       fix(dist.y() * textureY_inv - .5));
     if (op > 1 - 1E-6)

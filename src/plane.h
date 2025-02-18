@@ -7,7 +7,8 @@ class Plane : public Shape {
 public:
     Vector vect, right, up;
     double d;
-    Plane(const Vector& c, Texture* t, double ya, double pi, double ro, double tx, double ty);
+    Plane(const Vector& c, std::shared_ptr<Texture> t, double ya, double pi, double ro, double tx,
+          double ty);
     double getIntersection(const Ray& ray, const Shape*& hitShape) const override;
     bool   getLightIntersection(const Ray& ray, double toFill[3]) const override;
     void   move() override;

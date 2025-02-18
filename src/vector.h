@@ -11,7 +11,7 @@
 
 class Vector {
 public:
-    alignas(32) double d[3]; // Align for AVX
+    alignas(32) double d[3] = {0, 0, 0}; // Align for AVX
 
     Vector(double a, double b, double c) {
         d[0] = a;
@@ -35,6 +35,18 @@ public:
         d[0] += rhs.x();
         d[1] += rhs.y();
         d[2] += rhs.z();
+    }
+
+    inline void operator-=(const double rhs) {
+        d[0] -= rhs;
+        d[1] -= rhs;
+        d[2] -= rhs;
+    }
+    inline void operator+=(const double rhs) {
+        d[0] += rhs;
+        d[1] += rhs;
+
+        d[2] += rhs;
     }
     inline void operator*=(const double rhs) {
         d[0] *= rhs;

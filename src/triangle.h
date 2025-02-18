@@ -5,7 +5,7 @@
 class Triangle : public Plane {
 public:
     double thirdX;
-    Triangle(Vector c, Vector b, Vector a, Texture* t);
+    Triangle(Vector c, Vector b, Vector a, std::shared_ptr<Texture> t);
     double       getIntersection(const Ray& ray, const Shape*& hitShape) const override;
     bool         getLightIntersection(const Ray& ray, double fill[3]) const override;
     virtual AABB getBounds() const override {

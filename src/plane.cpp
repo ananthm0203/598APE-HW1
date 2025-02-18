@@ -1,6 +1,7 @@
 #include "plane.h"
 
-Plane::Plane(const Vector& c, Texture* t, double ya, double pi, double ro, double tx, double ty)
+Plane::Plane(const Vector& c, std::shared_ptr<Texture> t, double ya, double pi, double ro,
+             double tx, double ty)
     : Shape(c, t, ya, pi, ro), vect(c), right(c), up(c) {
     textureX     = tx;
     textureY     = ty;
@@ -103,9 +104,9 @@ bool Plane::getLightIntersection(const Ray& ray, double fill[3]) const {
 
     if (texture->opacity > 1 - 1E-6)
         return true;
-    auto [dist, denom] = solveScalers(right, up, vect, ray.point - center);
-    unsigned char temp[4];
-    double        amb, op, ref;
+    auto [dist, denom]    = solveScalers(right, up, vect, ray.point - center);
+    unsigned char temp[3] = {0, 0, 0};
+    double        amb = 0, op = 0, ref = 0;
     texture->getColor(temp, amb, op, ref, fix(dist.x() / (textureX * denom) - .5),
                       fix(dist.y() / (textureY * denom) - .5));
     if (op > 1 - 1E-6)
@@ -134,8 +135,8 @@ Vector Plane::getNormal(const Vector& point) const {
         return vect;
     else {
         auto [dist, denom] = solveScalers(right, up, vect, point - center);
-        double        am, ref, op;
-        unsigned char norm[3];
+        double        am = 0, ref = 0, op = 0;
+        unsigned char norm[3] = {0, 0, 0};
         normalMap->getColor(norm, am, op, ref, fix(dist.x() / (mapX * denom) - .5 + mapOffX),
                             fix(dist.y() / (mapY * denom) - .5 + mapOffY));
         Vector ret = ((norm[0] - 128) * right + (norm[1] - 128) * up + norm[2] * vect).normalize();

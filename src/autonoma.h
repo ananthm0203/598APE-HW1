@@ -14,7 +14,7 @@
 
 struct Autonoma {
     Camera                              camera;
-    Texture*                            skybox;
+    std::unique_ptr<Texture>            skybox;
     unsigned int                        depth;
     std::vector<std::unique_ptr<Shape>> shapes;
     std::vector<Light>                  lights;

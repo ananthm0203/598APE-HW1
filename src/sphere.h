@@ -6,7 +6,7 @@ class Sphere : public Shape {
 public:
     double radius;
 
-    Sphere(const Vector& c, Texture* t, double ya, double pi, double ro, double radius);
+    Sphere(const Vector& c, std::shared_ptr<Texture> t, double ya, double pi, double ro, double radius);
     double getIntersection(const Ray& ray, const Shape*& hitShape) const override;
     void   move() override;
     bool   getLightIntersection(const Ray& ray, double fill[3]) const override;

@@ -1,6 +1,7 @@
 #include "sphere.h"
 
-Sphere::Sphere(const Vector& c, Texture* t, double ya, double pi, double ro, double rad)
+Sphere::Sphere(const Vector& c, std::shared_ptr<Texture> t, double ya, double pi, double ro,
+               double rad)
     : Shape(c, t, ya, pi, ro) {
     textureX = textureY = 1.;
     normalMap           = NULL;
@@ -20,11 +21,11 @@ bool Sphere::getLightIntersection(const Ray& ray, double fill[3]) const {
     const double time  = (root1 > 0) ? root1 : root2;
     if (time >= 1.)
         return false;
-    Vector        point = ray.point + ray.vector * time;
-    double        data2 = (center.y() - point.y() + radius) / (2 * radius);
-    double        data3 = atan2(point.z() - center.z(), point.x() - center.x());
-    unsigned char temp[4];
-    double        amb, op, ref;
+    Vector        point   = ray.point + ray.vector * time;
+    double        data2   = (center.y() - point.y() + radius) / (2 * radius);
+    double        data3   = atan2(point.z() - center.z(), point.x() - center.x());
+    unsigned char temp[3] = {0, 0, 0};
+    double        amb = 0, op = 0, ref = 0;
     texture->getColor(temp, amb, op, ref, fix((yaw + data2) / M_TWO_PI / textureX),
                       fix((pitch / M_TWO_PI - (data3))) / textureY);
     if (op > 1 - 1E-6)
@@ -92,8 +93,8 @@ Vector Sphere::getNormal(const Vector& point) const {
     vect                = vect.normalize();
     Vector        right = Vector(vect.x(), vect.z(), -vect.y());
     Vector        up    = Vector(vect.z(), vect.y(), -vect.x());
-    double        am, ref, op;
-    unsigned char norm[3];
+    double        am = 0, ref = 0, op = 0;
+    unsigned char norm[3] = {0, 0, 0};
     normalMap->getColor(norm, am, op, ref, fix(((mapOffX + mapOffX) + data2) / M_TWO_PI / mapX),
                         fix(((mapOffY + mapOffY) / M_TWO_PI - data3) / mapY));
     return ((norm[0] - 128) * right + (norm[1] - 128) * up + norm[2] * vect).normalize();

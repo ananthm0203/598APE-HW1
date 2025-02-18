@@ -7,9 +7,9 @@ void ImageTexture::getColor(unsigned char toFill[3], double& am, double& op, dou
     toFill[0] = imageData[p1];
     toFill[1] = imageData[p1 + 1];
     toFill[2] = imageData[p1 + 2];
-    op       = imageData[p1 + 3] * opacity / 255.;
-    ref      = reflection;
-    am       = ambient;
+    op        = imageData[p1 + 3] * opacity / 255.;
+    ref       = reflection;
+    am        = ambient;
 }
 
 void ImageTexture::maskImageAlpha() {
@@ -134,9 +134,9 @@ void ImageTexture::getColor(unsigned char toFill[3], double& am, double& op, dou
     toFill[0] = imageData[start];
     toFill[1] = imageData[start + 1];
     toFill[2] = imageData[start + 2];
-    op       = imageData[start + 3] * opacity / 255.;
-    ref      = reflection;
-    am       = ambient;
+    op        = imageData[start + 3] * opacity / 255.;
+    ref       = reflection;
+    am        = ambient;
 }
 
 unsigned char* ImageTexture::setColor(unsigned int x, unsigned int y, unsigned char* data) {
@@ -159,7 +159,7 @@ unsigned char* ImageTexture::setColor(unsigned int x, unsigned int y, unsigned c
 ImageTexture::ImageTexture(unsigned int ww, unsigned int hh) : Texture(.3, 1., 0.) {
     w         = ww;
     h         = hh;
-    imageData = (unsigned char*)malloc(4 * w * h * sizeof(unsigned char));
+    imageData = std::make_unique<unsigned char[]>(4 * w * h * sizeof(unsigned char));
     int i;
     for (i = 0; i < w * h; i++) {
         imageData[i * 4 + 3] = 255;
@@ -167,7 +167,7 @@ ImageTexture::ImageTexture(unsigned int ww, unsigned int hh) : Texture(.3, 1., 0
 }
 ImageTexture::ImageTexture(unsigned char* data, unsigned int ww, unsigned int hh)
     : Texture(.3, 1., 0.) {
-    imageData = data;
+    imageData = std::make_unique<unsigned char[]>(4 * w * h * sizeof(unsigned char));
     w         = ww;
     h         = hh;
 }
@@ -212,7 +212,7 @@ void ImageTexture::readPPM(FILE* f, const char* file) {
             getc(f);
             ne = fpeek(f);
         }
-        imageData = (unsigned char*)malloc(4 * w * h * (sizeof(unsigned char)));
+        imageData = std::make_unique<unsigned char[]>(4 * w * h * sizeof(unsigned char));
         for (y = h - 1; y >= 0; y--)
             for (x = 0; x < w; x++) {
                 int total            = 4 * (x + y * w);
@@ -252,7 +252,7 @@ void ImageTexture::readPPM(FILE* f, const char* file) {
                 rr = getc(f);
             } while (rr != '\n');
         }
-        imageData = (unsigned char*)malloc(4 * w * h * (sizeof(unsigned char)));
+        imageData = std::make_unique<unsigned char[]>(4 * w * h * sizeof(unsigned char));
 
         for (y = h - 1; y >= 0; y--)
             for (x = 0; x < w; x++) {

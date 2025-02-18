@@ -1,12 +1,13 @@
 #ifndef __IMAGE_TEXTURE_H__
 #define __IMAGE_TEXTURE_H__
 #include "colortexture.h"
+#include <memory>
 
 class ImageTexture : public Texture {
     /** from 0 to 1 **/
 public:
-    unsigned int   w, h;
-    unsigned char* imageData;
+    unsigned int                     w, h;
+    std::unique_ptr<unsigned char[]> imageData;
     void getColor(unsigned char toFill[3], double& am, double& op, double& ref, double x, double y);
     void getColor(unsigned char toFill[3], double& am, double& op, double& ref, unsigned int x,
                   unsigned int y);

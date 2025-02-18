@@ -1,6 +1,7 @@
 // #include<printf.h>
 #include "src/Textures/colortexture.h"
 #include "src/Textures/imagetexture.h"
+#include "src/Textures/texture.h"
 #include "src/autonoma.h"
 #include "src/box.h"
 #include "src/bvh.h"
@@ -11,7 +12,6 @@
 #include "src/sphere.h"
 #include "src/triangle.h"
 #include "src/vector.h"
-#include <iostream>
 #include <memory>
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,7 +35,7 @@ float tdiff(struct timeval* start, struct timeval* end) {
 
 int W = 1000, H = 1000;
 
-unsigned char* DATA = (unsigned char*)malloc(W * H * 3 * sizeof(unsigned char));
+std::unique_ptr<unsigned char[]> DATA;
 
 unsigned char get(int i, int j, int k) {
     return DATA[3 * (i + j * W) + k];
@@ -51,7 +51,6 @@ void set(int i, int j, unsigned char r, unsigned char g, unsigned char b) {
 
 void getLight(double* tColor, const Autonoma& aut, const Vector& point, const Vector& norm,
               unsigned char flip) {
-    tColor[0] = tColor[1] = tColor[2] = 0.;
     for (const auto& light : aut.lights) {
         double lightColor[3];
         lightColor[0] = light.color[0] / 255.;
@@ -103,13 +102,13 @@ void calcColor(unsigned char toFill[3], const Autonoma& c, const Ray& ray, unsig
     double opacity, reflection, ambient;
     hitShape->getColor(toFill, ambient, opacity, reflection, Ray(intersect, ray.vector), depth);
 
-    double lightData[3];
+    double lightData[3] = {0, 0, 0};
     getLight(lightData, c, intersect, normal, hitShape->reversible());
     toFill[0] = (unsigned char)(toFill[0] * (ambient + lightData[0] * (1 - ambient)));
     toFill[1] = (unsigned char)(toFill[1] * (ambient + lightData[1] * (1 - ambient)));
     toFill[2] = (unsigned char)(toFill[2] * (ambient + lightData[2] * (1 - ambient)));
 
-    unsigned char col[4] = {0, 0, 0, 0};
+    unsigned char col[3] = {0, 0, 0};
     if (opacity < 1 - 1e-6) {
         Ray nextRay = Ray(intersect + ray.vector * 1E-4, ray.vector);
         calcColor(col, c, nextRay, depth + 1);
@@ -140,7 +139,7 @@ void        refresh_old(const Autonoma& c) {
                         int    n  = y * W + x;
                         Vector ra = c.camera.forward + ((double)x / W - 0.5) * c.camera.right +
                                     (0.5 - (double)y / H) * c.camera.up;
-                        unsigned char toFill[3];
+                        unsigned char toFill[3] __attribute__((aligned(16))) = {0, 0, 0};
                         calcColor(toFill, c, Ray(c.camera.focus, ra), 0);
                         DATA[3 * n]     = toFill[0];
                         DATA[3 * n + 1] = toFill[1];
@@ -167,18 +166,31 @@ void refresh(const Autonoma& c) {
             const int max_dy = std::min(TILE_SIZE, H - ty);
             const int max_dx = std::min(TILE_SIZE, W - tx);
 
+            Vector right_factor(right);
+            Vector up_factor(up);
+            Vector ra(forward);
+
             for (int dy = 0; dy < max_dy; ++dy) {
-                const int    y          = ty + dy;
-                const Vector y_factor   = (0.5 - y * h_inv) * up;
-                const int    base_index = y * W + tx;
+                const int y = ty + dy;
+
+                up_factor            = up;
+                const double y_scale = (0.5 - y * h_inv);
+                up_factor *= y_scale;
+
+                const int base_index = y * W + tx;
 
                 for (int dx = 0; dx < max_dx; ++dx) {
-                    const int x           = tx + dx;
-                    const int pixel_index = (base_index + dx) * 3;
+                    const int    x           = tx + dx;
+                    const int    pixel_index = (base_index + dx) * 3;
+                    const double x_mult      = x * w_inv - 0.5;
 
-                    Vector ra = forward + (x * w_inv - 0.5) * right + y_factor;
+                    ra           = forward;
+                    right_factor = right;
+                    right_factor *= x_mult;
+                    ra += right_factor;
+                    ra += up_factor;
 
-                    unsigned char toFill[4] __attribute__((aligned(16)));
+                    unsigned char toFill[3] __attribute__((aligned(16))) = {0, 0, 0};
                     calcColor(toFill, c, Ray(focus, ra), 0);
 
                     DATA[pixel_index]     = toFill[0];
@@ -192,7 +204,7 @@ void refresh(const Autonoma& c) {
 
 void outputPPM(FILE* f) {
     fprintf(f, "P6 %d %d 255 ", W, H);
-    fwrite(DATA, 1, W * H * 3, f);
+    fwrite(DATA.get(), 1, W * H * 3, f);
 }
 
 void outputPPM(char* file) {
@@ -273,7 +285,7 @@ Texture* parseTexture(FILE* f, bool allowNull) {
             printf("Could not read <image path>\n");
             exit(1);
         }
-        ImageTexture* text = new ImageTexture(image_file);
+        auto text = new ImageTexture(image_file);
         text->maskImageAlpha();
         return text;
     }
@@ -285,7 +297,7 @@ Texture* parseTexture(FILE* f, bool allowNull) {
             exit(1);
         }
 
-        ImageTexture* text = new ImageTexture(w, h);
+        auto text = new ImageTexture(w, h);
         for (int x = 0; x < w; x++) {
             for (int y = 0; y < h; y++) {
                 int r, g, b;
@@ -336,7 +348,7 @@ Autonoma createInputs(const char* inputFile) {
     double   yaw        = 0;
     double   pitch      = 0;
     double   roll       = 0;
-    Texture* background = NULL;
+    Texture* background = nullptr;
 
     FILE* f = NULL;
     if (inputFile) {
@@ -384,10 +396,11 @@ Autonoma createInputs(const char* inputFile) {
                            "<roll> <tx> <ty>\n");
                     exit(1);
                 }
-                Texture* texture = parseTexture(f, false);
-                auto     shape = std::make_unique<Plane>(Vector(plane_x, plane_y, plane_z), texture,
-                                                     yaw, pitch, roll, tx, ty);
-                shape->normalMap = parseTexture(f, true);
+                auto texture        = parseTexture(f, false);
+                auto texture_shared = std::shared_ptr<Texture>(texture);
+                auto shape          = std::make_unique<Plane>(Vector(plane_x, plane_y, plane_z),
+                                                     texture_shared, yaw, pitch, roll, tx, ty);
+                shape->normalMap    = std::shared_ptr<Texture>(parseTexture(f, true));
                 MAIN_DATA.addShape(std::move(shape));
             } else if (streq(object_type, "disk")) {
                 double disk_x, disk_y, disk_z;
@@ -399,10 +412,11 @@ Autonoma createInputs(const char* inputFile) {
                            "<roll> <tx> <ty>\n");
                     exit(1);
                 }
-                Texture* texture = parseTexture(f, false);
-                auto shape = std::make_unique<Disk>(Vector(disk_x, disk_y, disk_z), texture, yaw,
-                                                    pitch, roll, tx, ty);
-                shape->normalMap = parseTexture(f, true);
+                auto texture        = parseTexture(f, false);
+                auto texture_shared = std::shared_ptr<Texture>(texture);
+                auto shape = std::make_unique<Disk>(Vector(disk_x, disk_y, disk_z), texture_shared,
+                                                    yaw, pitch, roll, tx, ty);
+                shape->normalMap = std::shared_ptr<Texture>(parseTexture(f, true));
                 MAIN_DATA.addShape(std::move(shape));
             } else if (streq(object_type, "box")) {
                 double box_x, box_y, box_z;
@@ -414,10 +428,11 @@ Autonoma createInputs(const char* inputFile) {
                            "<tx> <ty>\n");
                     exit(1);
                 }
-                Texture* texture = parseTexture(f, false);
-                auto shape = std::make_unique<Box>(Vector(box_x, box_y, box_z), texture, yaw, pitch,
-                                                   roll, tx, ty);
-                shape->normalMap = parseTexture(f, true);
+                auto texture        = parseTexture(f, false);
+                auto texture_shared = std::shared_ptr<Texture>(texture);
+                auto shape = std::make_unique<Box>(Vector(box_x, box_y, box_z), texture_shared, yaw,
+                                                   pitch, roll, tx, ty);
+                shape->normalMap = std::shared_ptr<Texture>(parseTexture(f, true));
                 MAIN_DATA.addShape(std::move(shape));
             } else if (streq(object_type, "triangle")) {
                 double x1, y1, z1;
@@ -428,11 +443,12 @@ Autonoma createInputs(const char* inputFile) {
                     printf("Could not read <x1> <y1> <z1> <x2> <y2> <z2> <x3> <y3> <z3>\n");
                     exit(1);
                 }
-                Texture* texture = parseTexture(f, false);
-                auto     shape = std::make_unique<Triangle>(Vector(x1, y1, z1), Vector(x2, y2, z2),
-                                                        Vector(x3, y3, z3), texture);
+                auto texture        = parseTexture(f, false);
+                auto texture_shared = std::shared_ptr<Texture>(texture);
+                auto shape = std::make_unique<Triangle>(Vector(x1, y1, z1), Vector(x2, y2, z2),
+                                                        Vector(x3, y3, z3), texture_shared);
+                shape->normalMap = std::shared_ptr<Texture>(parseTexture(f, true));
                 MAIN_DATA.addShape(std::move(shape));
-                shape->normalMap = parseTexture(f, true);
             } else if (streq(object_type, "sphere")) {
                 double sphere_x, sphere_y, sphere_z;
                 double yaw, pitch, roll;
@@ -443,10 +459,13 @@ Autonoma createInputs(const char* inputFile) {
                            "<pitch> <roll> <radius>\n");
                     exit(1);
                 }
-                Texture* texture = parseTexture(f, false);
-                auto shape = std::make_unique<Sphere>(Vector(sphere_x, sphere_y, sphere_z), texture,
-                                                      yaw, pitch, roll, radius);
-                shape->normalMap = parseTexture(f, true);
+                auto texture        = parseTexture(f, false);
+                auto texture_shared = std::shared_ptr<Texture>(texture);
+                auto shape          = std::make_unique<Sphere>(Vector(sphere_x, sphere_y, sphere_z),
+                                                      texture_shared, yaw, pitch, roll, radius);
+                // jank, but avoids having to move the unique ptr all the way down shape
+                // constructors
+                shape->normalMap = std::shared_ptr<Texture>(parseTexture(f, true));
                 MAIN_DATA.addShape(std::move(shape));
             } else if (streq(object_type, "mesh")) {
                 char   point_filepath[100];
@@ -462,8 +481,10 @@ Autonoma createInputs(const char* inputFile) {
                            "filepath> <num_polygons> <off_x> <off_y> <off_z>\n");
                     exit(1);
                 }
-                Texture* texture   = parseTexture(f, false);
-                Texture* normalMap = parseTexture(f, true);
+                auto texture          = parseTexture(f, false);
+                auto texture_shared   = std::shared_ptr<Texture>(texture);
+                auto normalMap        = parseTexture(f, true);
+                auto normalMap_shared = std::shared_ptr<Texture>(normalMap);
 
                 FILE *vectors = fopen(point_filepath, "r"), *triangles = fopen(poly_filepath, "r");
                 if (!vectors) {
@@ -480,10 +501,10 @@ Autonoma createInputs(const char* inputFile) {
                 fclose(triangles);
                 Vector offset(off_x, off_y, off_z);
                 for (int i = 0; i < num_polygons; i++) {
-                    auto shape       = std::make_unique<Triangle>(points[polys[i].a] + offset,
-                                                            points[polys[i].b] + offset,
-                                                            points[polys[i].c] + offset, texture);
-                    shape->normalMap = normalMap;
+                    auto shape = std::make_unique<Triangle>(
+                        points[polys[i].a] + offset, points[polys[i].b] + offset,
+                        points[polys[i].c] + offset, texture_shared);
+                    shape->normalMap = normalMap_shared;
                     MAIN_DATA.addShape(std::move(shape));
                 }
             } else {
@@ -491,6 +512,7 @@ Autonoma createInputs(const char* inputFile) {
                 exit(1);
             }
         }
+        fclose(f);
     }
 
     MAIN_DATA.bvh = std::make_unique<BVH>(MAIN_DATA.shapes);
@@ -511,15 +533,17 @@ double cosfn(double x, double from, double to) {
     return (to - from) * cos(x * 6.28) + from;
 }
 
-void setFrame(const char* animateFile, Autonoma& MAIN_DATA, int frame, int frameLen) {
-    if (animateFile) {
+void setFrame(FILE* f, Autonoma& MAIN_DATA, int frame, int frameLen) {
+    if (f) {
         char   object_type[80];
         char   transition_type[80];
         int    obj_num;
         char   field_type[80];
         double from;
         double to;
-        FILE*  f = fopen(animateFile, "r");
+
+        rewind(f);
+
         while (lscanf(f, "%s %s %d %s %lf %lf", transition_type, object_type, &obj_num, field_type,
                       &from, &to) != EOF) {
             double (*func)(double, double, double);
@@ -694,15 +718,19 @@ int main(int argc, const char** argv) {
         }
     }
 
+    DATA = std::make_unique<unsigned char[]>(W * H * 3);
+
     Autonoma MAIN_DATA = createInputs(inFile);
 
     int  frame;
     char command[200];
 
+    FILE* f = fopen(animateFile, "r");
+
     struct timeval start, end;
     gettimeofday(&start, NULL);
     for (frame = 0; frame < frameLen; frame++) {
-        setFrame(animateFile, MAIN_DATA, frame, frameLen);
+        setFrame(f, MAIN_DATA, frame, frameLen);
         if (frameLen == 1) {
             snprintf(command, sizeof(command), "%s", outFile);
         } else if (png) {
@@ -717,6 +745,7 @@ int main(int argc, const char** argv) {
         }
         printf("Done Frame %7d|\n", frame);
     }
+    fclose(f);
 
     gettimeofday(&end, NULL);
     printf("Total time to create images=%0.6f seconds\n", tdiff(&start, &end));
