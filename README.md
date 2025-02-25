@@ -4,6 +4,12 @@ This repository contains code for homework 1 of 598APE.
 
 In particular, this repository is an implementation of a Raytracer.
 
+To setup, go onto provided VM and run the following commands:
+```bash
+mkdir output
+bash install.sh
+```
+
 To compile the program run:
 ```bash
 make -j
