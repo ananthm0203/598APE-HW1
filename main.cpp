@@ -725,7 +725,10 @@ int main(int argc, const char** argv) {
     int  frame;
     char command[200];
 
-    FILE* f = fopen(animateFile, "r");
+    FILE* f = nullptr;
+    if (animateFile) {
+        f = fopen(animateFile, "r");
+    }
 
     struct timeval start, end;
     gettimeofday(&start, NULL);
@@ -745,8 +748,9 @@ int main(int argc, const char** argv) {
         }
         printf("Done Frame %7d|\n", frame);
     }
-    fclose(f);
-
+    if (f) {
+        fclose(f);
+    }
     gettimeofday(&end, NULL);
     printf("Total time to create images=%0.6f seconds\n", tdiff(&start, &end));
 
